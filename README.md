@@ -1,5 +1,5 @@
 # Nanoleaf Java Library
-This is a Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are (will be) supported.
+This is a synchronous *and* asynchronous Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are (will be) supported.
 
 ## Documentation (not yet ready)
 
