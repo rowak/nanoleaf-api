@@ -47,6 +47,8 @@ device.toggleOn();              // toggles the state of the device (on -> off, o
 
 #### Static Effects
 
+## Events
+
 ## Schedules (WIP)
 
 ## Exceptions
