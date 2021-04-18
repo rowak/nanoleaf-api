@@ -3,6 +3,11 @@ package com.github.rowak.nanoleafapi;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import com.here.oksse.OkSse;
+import com.here.oksse.ServerSentEvent;
+
+import okhttp3.Request;
+
 public class Shapes extends NanoleafDevice {
 
 	/**

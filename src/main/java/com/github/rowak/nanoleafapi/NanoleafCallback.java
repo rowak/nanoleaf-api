@@ -4,7 +4,11 @@ import com.github.rowak.nanoleafapi.util.HttpUtil;
 
 public interface NanoleafCallback<T> {
 	
-	/** An internal API error, or the device returned an impossible (but http-allowable) response. **/
+	/** An internal API error, or the device returned an impossible (but http-allowable) response.
+	 *  This status code indicates that the returned data in the callback object is invalid.
+	 *  For example, if a method is expecting an integer and the device returns a string that
+	 *  can't be parsed into an integer, a FAILURE status code will be returned instead of the
+	 *  status code from the device, and the data will be set to 0. **/
 	public static final int FAILURE = 0;
 	
 	/** The request was successful. The device returned 200 (OK) or 204 (No Content). **/

@@ -3,11 +3,15 @@ package com.github.rowak.nanoleafapi;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.github.rowak.nanoleafapi.event.NanoleafEventListener;
 import com.github.rowak.nanoleafapi.util.HttpUtil;
+import com.here.oksse.OkSse;
+import com.here.oksse.ServerSentEvent;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 
 import java.awt.Point;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public abstract class NanoleafDevice {
 	
@@ -27,6 +32,7 @@ public abstract class NanoleafDevice {
 	public static final int DEFAULT_PORT = 16021;
 	
 	private OkHttpClient client;
+	private List<ServerSentEvent> sse;
 	
 	private String hostname, accessToken;
 	private int port;
@@ -87,7 +93,7 @@ public abstract class NanoleafDevice {
 		this.port = port;
 		this.accessToken = accessToken;
 		
-		client = new OkHttpClient();
+		client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
 		String body = get(getURL(""));
 		JSONObject controllerInfo = new JSONObject(body);
 		this.name = controllerInfo.getString("name");
@@ -95,6 +101,8 @@ public abstract class NanoleafDevice {
 		this.manufacturer = controllerInfo.getString("manufacturer");
 		this.firmwareVersion = controllerInfo.getString("firmwareVersion");
 		this.model = controllerInfo.getString("model");
+		
+		sse = new ArrayList<ServerSentEvent>();
 	}
 	
 	/**
@@ -106,6 +114,15 @@ public abstract class NanoleafDevice {
 	 */
 	public void closeAsync() {
 		client.dispatcher().executorService().shutdown();
+	}
+	
+	/**
+	 * Closes all event listeners.
+	 */
+	public void closeEventListener() {
+		for (ServerSentEvent s : sse) {
+			s.close();
+		}
 	}
 	
 	/**
@@ -1466,6 +1483,45 @@ public abstract class NanoleafDevice {
 		final int BYTE_SIZE = 256;
 		int times = Math.floorDiv(num, BYTE_SIZE);
 		return String.format("%s %s", times, num-(BYTE_SIZE*times));
+	}
+	
+	public ServerSentEvent registerTouchEventListener(NanoleafEventListener listener,
+			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
+		Request req = new Request.Builder()
+				.url(url)
+				.get()
+				.build();
+		OkSse okSse = new OkSse(client);
+		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
+		sse.add(s);
+		return s;
+	}
+	
+	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		StringBuilder query = new StringBuilder("?id=");
+		if (stateEvents) {
+			query.append("1");
+		}
+		if (layoutEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("2");
+		}
+		if (effectsEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("3");
+		}
+		if (effectsEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("4");
+		}
+		return query.toString();
 	}
 	
 	/**

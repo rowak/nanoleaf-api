@@ -16,6 +16,14 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
+  
+  <repositories>
+  	<repository>
+  	  <id>mulesoft</id>
+  	  <name>Mulesoft</name>
+  	  <url>	https://repository.mulesoft.org/nexus/content/repositories/public/</url>
+  	</repository>
+  </repositories>
 
   <dependencies>
     <dependency>
@@ -38,6 +46,11 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
       <version>4.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.heremaps</groupId>
+      <artifactId>oksse</artifactId>
+      <version>0.9.0</version>
     </dependency>
   </dependencies>
 
