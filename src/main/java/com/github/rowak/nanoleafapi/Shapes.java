@@ -1,12 +1,6 @@
 package com.github.rowak.nanoleafapi;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-import com.here.oksse.OkSse;
-import com.here.oksse.ServerSentEvent;
-
-import okhttp3.Request;
 
 public class Shapes extends NanoleafDevice {
 
@@ -20,7 +14,7 @@ public class Shapes extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Shapes(String hostname, int port, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		
 		super(hostname, port, accessToken);
 	}
@@ -34,7 +28,7 @@ public class Shapes extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Shapes(String hostname, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		super(hostname, DEFAULT_PORT, accessToken);
 	}
 }

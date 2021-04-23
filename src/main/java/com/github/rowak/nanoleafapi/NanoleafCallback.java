@@ -57,6 +57,7 @@ public interface NanoleafCallback<T> {
 	 * @param status  the response status (see above status codes)
 	 * @param data  the response data; only set when the status code is SUCCESS (1),
 	 * 				otherwise null
+	 * @param device  the device that has completed
 	 */
-	public void onCompleted(int status, T data);
+	public void onCompleted(int status, T data, NanoleafDevice device);
 }

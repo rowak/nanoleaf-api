@@ -1,7 +1,6 @@
 package com.github.rowak.nanoleafapi;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 public class Canvas extends NanoleafDevice {
 	
@@ -15,7 +14,7 @@ public class Canvas extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Canvas(String hostname, int port, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		
 		super(hostname, port, accessToken);
 	}
@@ -29,7 +28,7 @@ public class Canvas extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Canvas(String hostname, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		super(hostname, DEFAULT_PORT, accessToken);
 	}
 }

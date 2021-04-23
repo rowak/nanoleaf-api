@@ -2,7 +2,6 @@ package com.github.rowak.nanoleafapi;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
 
 import org.json.JSONObject;
 
@@ -18,7 +17,7 @@ public class Aurora extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Aurora(String hostname, int port, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		super(hostname, port, accessToken);
 	}
 	
@@ -31,7 +30,7 @@ public class Aurora extends NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	public Aurora(String hostname, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		super(hostname, DEFAULT_PORT, accessToken);
 	}
 	
@@ -54,15 +53,15 @@ public class Aurora extends NanoleafDevice {
 	@Override
 	public void getNumPanelsAsync(boolean includeRhythm, NanoleafCallback<Integer> callback)
 			throws NanoleafException, IOException {
-		isRhythmConnectedAsync((status, data) -> {
+		isRhythmConnectedAsync((status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, 0);
+				callback.onCompleted(status, 0, device);
 			}
-			getAsyncInt(getURL("panelLayout/layout/numPanels"), (status2, data2) -> {
+			getAsyncInt(getURL("panelLayout/layout/numPanels"), (status2, data2, device2) -> {
 				if (!includeRhythm || data) {
 					data2--;
 				}
-				callback.onCompleted(status2, data2);
+				callback.onCompleted(status2, data2, device2);
 			});
 		});
 	}
@@ -197,9 +196,9 @@ public class Aurora extends NanoleafDevice {
 	}
 	
 	public void getRhythmPanelAsync(NanoleafCallback<Panel> callback) {
-		getAsync(getURL("rhythm"), (status, data) -> {
+		getAsync(getURL("rhythm"), (status, data, device) -> {
 			Panel rhythmPanel = parseRhythmPanelJSON(data);
-			callback.onCompleted(status, rhythmPanel);
+			callback.onCompleted(status, rhythmPanel, device);
 		});
 	}
 	
@@ -229,12 +228,12 @@ public class Aurora extends NanoleafDevice {
 	public void enableExternalStreamingAsync(NanoleafCallback<String> callback)
 			throws NanoleafException, IOException {
 		String body = "{\"write\": {\"command\": \"display\", \"animType\": \"extControl\"}}";
-		putAsync(getURL("effects"), body, (status, data) -> {
+		putAsync(getURL("effects"), body, (status, data, device) -> {
 			JSONObject response = new JSONObject(data);
 			String host = response.getString("streamControlIpAddr");
 			int port = response.getInt("streamControlPort");
 			externalAddress = new InetSocketAddress(host, port);
-			callback.onCompleted(status, null);
+			callback.onCompleted(status, null, device);
 		});
 	}
 	

@@ -23,7 +23,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public abstract class NanoleafDevice {
@@ -49,6 +48,37 @@ public abstract class NanoleafDevice {
 	protected InetSocketAddress externalAddress;
 	
 	/**
+	 * A generic creation method for instantiating a NanoleafDevice object, without requiring
+	 * prior knowledge of the device *type*.
+	 * @param hostname  			the hostname of the controller
+	 * @param port  				the port of the controller (default=16021)
+	 * @param accessToken  			a unique authentication token
+	 * @return  					a new nanoleaf device
+	 * @throws NanoleafException  	if the access token is invalid
+	 * @throws IOException			if an HTTP exception occurs
+	 */
+	public static NanoleafDevice createDevice(String hostname, int port, String accessToken)
+			throws NanoleafException, IOException {
+		OkHttpClient client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
+		Response resp = HttpUtil.getHttpSync(client, getURL("", hostname, port, accessToken));
+		NanoleafException.checkStatusCode(resp.code());
+		JSONObject controllerInfo = new JSONObject(resp.body().string());
+		if (controllerInfo.has("name")) {
+			String name = controllerInfo.getString("name").toLowerCase();
+			if (name.contains("aurora") || name.contains("light panels")) {
+				return new Aurora(hostname, port, accessToken);
+			}
+			else if (name.contains("canvas")) {
+				return new Canvas(hostname, port, accessToken);
+			}
+			else if (name.contains("shapes")) {
+				return new Shapes(hostname, port, accessToken);
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Creates a new instance of the controller.
 	 * @param hostname  the hostname of the controller
 	 * @param port  the port of the controller (default=16021)
@@ -58,8 +88,12 @@ public abstract class NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	protected NanoleafDevice(String hostname, int port, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		init(hostname, port, accessToken);
+	}
+	
+	protected NanoleafDevice(String hostname, int port, String accessToken, NanoleafCallback<String> callback) {
+		initAsync(hostname, port, accessToken, callback);
 	}
 	
 	/**
@@ -71,8 +105,12 @@ public abstract class NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	protected NanoleafDevice(String hostname, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		init(hostname, DEFAULT_PORT, accessToken);
+	}
+	
+	protected NanoleafDevice(String hostname, String accessToken, NanoleafCallback<String> callback) {
+		initAsync(hostname, DEFAULT_PORT, accessToken, callback);
 	}
 	
 	/**
@@ -88,7 +126,7 @@ public abstract class NanoleafDevice {
 	 * @throws InterruptedException
 	 */
 	private void init(String hostname, int port, String accessToken)
-			throws NanoleafException, IOException, ExecutionException, InterruptedException {
+			throws NanoleafException, IOException {
 		this.hostname = hostname;
 		this.port = port;
 		this.accessToken = accessToken;
@@ -103,6 +141,20 @@ public abstract class NanoleafDevice {
 		this.model = controllerInfo.getString("model");
 		
 		sse = new ArrayList<ServerSentEvent>();
+	}
+	
+	private void initAsync(String hostname, int port, String accessToken, NanoleafCallback<String> callback) {
+		client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
+		sse = new ArrayList<ServerSentEvent>();
+		getAsync(getURL(""), (status, data, device) -> {
+			JSONObject controllerInfo = new JSONObject(data);
+			this.name = controllerInfo.getString("name");
+			this.serialNumber = controllerInfo.getString("serialNo");
+			this.manufacturer = controllerInfo.getString("manufacturer");
+			this.firmwareVersion = controllerInfo.getString("firmwareVersion");
+			this.model = controllerInfo.getString("model");
+			callback.onCompleted(status, data, device);
+		});
 	}
 	
 	/**
@@ -541,6 +593,11 @@ public abstract class NanoleafDevice {
 		put(getURL("state"), body);
 	}
 	
+	public void setColorTemperatureAsync(int colorTemperature, NanoleafCallback<String> callback) {
+		String body = String.format("{\"ct\": {\"value\": %d}}", colorTemperature);
+		putAsync(getURL("state"), body, callback);
+	}
+	
 	public void increaseColorTemperature(int amount)
 			throws NanoleafException, IOException {
 		String body = String.format("{\"ct\": {\"increment\": %d}}", amount);
@@ -600,8 +657,8 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getColorModeAsync(NanoleafCallback<String> callback) {
-		getAsync(getURL("state/colorMode"), (status, data) -> {
-			callback.onCompleted(status, data.replace("\"", ""));
+		getAsync(getURL("state/colorMode"), (status, data, device) -> {
+			callback.onCompleted(status, data.replace("\"", ""), device);
 		});
 	}
 	
@@ -639,8 +696,8 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getCurrentEffectNameAsync(NanoleafCallback<String> callback) {
-		getAsync(getURL("effects/select"), (status, data) -> {
-			callback.onCompleted(status, data.replace("\"", ""));
+		getAsync(getURL("effects/select"), (status, data, device) -> {
+			callback.onCompleted(status, data.replace("\"", ""), device);
 		});
 	}
 	
@@ -656,9 +713,9 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getCurrentEffectAsync(NanoleafCallback<Effect> callback) {
-		getCurrentEffectNameAsync((status, data) -> {
+		getCurrentEffectNameAsync((status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
 			getEffectAsync(data, callback);
 		});
@@ -720,15 +777,15 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getEffectsListAsync(NanoleafCallback<String[]> callback) {
-		getAsync(getURL("effects/effectsList"), (status, data) -> {
+		getAsync(getURL("effects/effectsList"), (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
 			JSONArray json = new JSONArray(data);
 			String[] effects = new String[json.length()];
 			for (int i = 0; i < json.length(); i++)
 				effects[i] = json.getString(i);
-			callback.onCompleted(status, effects);
+			callback.onCompleted(status, effects, device);
 		});
 	}
 	
@@ -749,11 +806,11 @@ public abstract class NanoleafDevice {
 	
 	public void getEffectAsync(String effectName, NanoleafCallback<Effect> callback) {
 		String body = String.format("{\"write\": {\"command\": \"request\", \"animName\": \"%s\"}}", effectName);
-		putAsync(getURL("effects"), body, (status, data) -> {
+		putAsync(getURL("effects"), body, (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
-			callback.onCompleted(status, Effect.fromJSON(data));
+			callback.onCompleted(status, Effect.fromJSON(data), device);
 		});
 	}
 	
@@ -775,9 +832,9 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getAllEffectsAsync(NanoleafCallback<Effect[]> callback) {
-		writeEffectAsync("{\"command\": \"requestAll\"}", (status, data) -> {
+		writeEffectAsync("{\"command\": \"requestAll\"}", (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
 			JSONObject json = new JSONObject(data);
 			JSONArray animations = json.getJSONArray("animations");
@@ -785,7 +842,7 @@ public abstract class NanoleafDevice {
 			for (int i = 0; i < animations.length(); i++) {
 				effects[i] = Effect.createFromJSON(animations.getJSONObject(i));
 			}
-			callback.onCompleted(status, effects);
+			callback.onCompleted(status, effects, device);
 		});
 	}
 	
@@ -1091,11 +1148,11 @@ public abstract class NanoleafDevice {
 	
 	public void getNumPanelsAsync(boolean includeRhythm, NanoleafCallback<Integer> callback)
 			throws NanoleafException, IOException {
-		getAsyncInt(getURL("panelLayout/layout/numPanels"), (status2, data2) -> {
+		getAsyncInt(getURL("panelLayout/layout/numPanels"), (status2, data2, device) -> {
 			if (!includeRhythm) {
 				data2--;
 			}
-			callback.onCompleted(status2, data2);
+			callback.onCompleted(status2, data2, device);
 		});
 	}
 	
@@ -1121,12 +1178,12 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getPanelsAsync(NanoleafCallback<Panel[]> callback) {
-		getAsync(getURL("panelLayout/layout"), (status, data) -> {
+		getAsync(getURL("panelLayout/layout"), (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
 			Panel[] panels = parsePanelsJSON(data);
-			callback.onCompleted(status, panels);
+			callback.onCompleted(status, panels, device);
 		});
 	}
 	
@@ -1191,12 +1248,12 @@ public abstract class NanoleafDevice {
 	}
 	
 	public void getPanelAsync(int id, NanoleafCallback<Panel> callback) {
-		getPanelsAsync((status, data) -> {
+		getPanelsAsync((status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, null);
+				callback.onCompleted(status, null, device);
 			}
 			Panel panel = getPanel(id, data);
-			callback.onCompleted(status, panel);
+			callback.onCompleted(status, panel, device);
 		});
 	}
 	
@@ -1316,11 +1373,11 @@ public abstract class NanoleafDevice {
 	public void enableExternalStreamingAsync(NanoleafCallback<String> callback)
 			throws NanoleafException, IOException {
 		String body = "{\"write\": {\"command\": \"display\", \"animType\": \"extControl\", \"extControlVersion\": \"v2\"}}";
-		putAsync(getURL("effects"), body, (status, data) -> {
+		putAsync(getURL("effects"), body, (status, data, device) -> {
 			if (status == NanoleafCallback.SUCCESS) { 
 				externalAddress = new InetSocketAddress(hostname, port);
 			}
-			callback.onCompleted(status, null);
+			callback.onCompleted(status, null, device);
 		});
 	}
 	
@@ -1534,6 +1591,11 @@ public abstract class NanoleafDevice {
 				hostname, port, API_LEVEL, accessToken, endpoint);
 	}
 	
+	private static String getURL(String endpoint, String hostname, int port, String accessToken) {
+		return String.format("http://%s:%d/api/%s/%s/%s",
+				hostname, port, API_LEVEL, accessToken, endpoint);
+	}
+	
 	protected String get(String url) throws NanoleafException, IOException {
 		Response resp = HttpUtil.getHttpSync(client, url);
 		NanoleafException.checkStatusCode(resp.code());
@@ -1556,25 +1618,25 @@ public abstract class NanoleafDevice {
 	}
 	
 	protected void getAsyncInt(String url, NanoleafCallback<Integer> callback) {
-		getAsync(url, (status, data) -> {
+		getAsync(url, (status, data, device) -> {
 			try {
 				int value = Integer.parseInt(data);
-				callback.onCompleted(status, value);
+				callback.onCompleted(status, value, device);
 			}
 			catch (NumberFormatException e) {
-				callback.onCompleted(NanoleafCallback.FAILURE, 0);
+				callback.onCompleted(NanoleafCallback.FAILURE, 0, device);
 			}
 		});
 	}
 	
 	protected void getAsyncBool(String url, NanoleafCallback<Boolean> callback) {
-		getAsync(url, (status, data) -> {
+		getAsync(url, (status, data, device) -> {
 			try {
 				boolean value = Boolean.parseBoolean(data);
-				callback.onCompleted(status, value);
+				callback.onCompleted(status, value, device);
 			}
 			catch (NumberFormatException e) {
-				callback.onCompleted(NanoleafCallback.FAILURE, false);
+				callback.onCompleted(NanoleafCallback.FAILURE, false, device);
 			}
 		});
 	}
@@ -1584,7 +1646,7 @@ public abstract class NanoleafDevice {
 			@Override
 			public void onFailure(Call call, IOException e) {
 				if (callback != null) {
-					callback.onCompleted(NanoleafCallback.FAILURE, null);
+					callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
 				}
 			}
 
@@ -1595,7 +1657,7 @@ public abstract class NanoleafDevice {
 					if (code == 200 || code == 204) {
 						code = NanoleafCallback.SUCCESS;
 					}
-					callback.onCompleted(code, response.body().string());
+					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
 				}
 			}
 		});
@@ -1606,7 +1668,7 @@ public abstract class NanoleafDevice {
 			@Override
 			public void onFailure(Call call, IOException e) {
 				if (callback != null) {
-					callback.onCompleted(NanoleafCallback.FAILURE, null);
+					callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
 				}
 			}
 
@@ -1617,7 +1679,7 @@ public abstract class NanoleafDevice {
 					if (code == 200 || code == 204) {
 						code = NanoleafCallback.SUCCESS;
 					}
-					callback.onCompleted(code, response.body().string());
+					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
 				}
 			}
 		});
@@ -1628,7 +1690,7 @@ public abstract class NanoleafDevice {
 			@Override
 			public void onFailure(Call call, IOException e) {
 				if (callback != null) {
-					callback.onCompleted(NanoleafCallback.FAILURE, null);
+					callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
 				}
 			}
 
@@ -1639,7 +1701,7 @@ public abstract class NanoleafDevice {
 					if (code == 200 || code == 204) {
 						code = NanoleafCallback.SUCCESS;
 					}
-					callback.onCompleted(code, response.body().string());
+					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
 				}
 			}
 		});

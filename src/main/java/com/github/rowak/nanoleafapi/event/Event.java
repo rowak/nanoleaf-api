@@ -1,7 +1,5 @@
 package com.github.rowak.nanoleafapi.event;
 
-import java.util.Map;
-
 import org.json.JSONObject;
 
 public class Event {
