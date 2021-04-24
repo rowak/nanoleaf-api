@@ -119,7 +119,7 @@ The following example initializes external streaming mode, then sets a few panel
 Panel[] panels = device.getPanels();
 device.enableExternalStreaming();                               // enable external streaming
 for (int i = 0; i < 4; i++)
-    device.setPanelExternalStreaming(panels[0], "#FF00FF", 1);  // set a few panels to purple
+    device.setPanelExternalStreaming(panels[i], "#FF00FF", 1);  // set a few panels to purple
 ```
 
 You can also send much more complicated static and animated effects very quickly using external streaming.
@@ -136,11 +136,25 @@ You can also send much more complicated static and animated effects very quickly
 
 ## Schedules (WIP)
 
+## Asynchronous
+Almost every synchronous method that communicates with the Nanoleaf Device has an accompanying asynchronous method. The naming scheme for these methods is "methodName...Async" (for example, turnOn() and turnOnAsync()).
+
+Asynchronous methods take a parameterized `NanoleafCallback` object as an additional argument, which is a callback interface. When the task completes, NanoleafCallback.onCompleted(status, data, device) is called which returns three parameters. The first parameter (status) indicates the completion status of the task, and on success, is set to NanoleafCallback.SUCCESS. The second parameter (data) returns the data expected to be returned by the task, or null if the task did not succeed. The third parameter (device) is the `NanoleafDevice` object of the device that completed the task.
+
+The following example gets all of the effects on a Nanoleaf device asynchronously:
+```Java
+device.getAllEffectsAsync((status, effects, device) -> {
+    if (status == NanoleafCallback.SUCCESS) {
+        // success!
+    }
+    else {
+        // uh oh
+    }
+});
+```
+
 ## Exceptions
 ### NanoleafException
 This exception will be thrown if an HTTP error code is returned from the Nanoleaf device. You may run into the following error codes:
 - 401 (Unauthorized)  --  Thrown if you try to use methods from a Nanoleaf device with an invalid access token
 - 422 (Unprocessable entity)  --  Thrown if the Nanoleaf device rejects the arguments you provided for a method 
-
-## Asynchronous
-
