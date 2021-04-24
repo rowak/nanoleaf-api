@@ -3,7 +3,7 @@ package com.github.rowak.nanoleafapi;
 import java.net.InetAddress;
 import java.util.Iterator;
 
-import net.straylightlabs.hola.sd.Instance;
+import com.github.rowak.nanoleafapi.util.Instance;
 
 /**
  * An object for storing information related to an
@@ -124,5 +124,10 @@ public class NanoleafDeviceMeta {
 	 */
 	public void setDeviceName(String deviceName) {
 		this.deviceName = deviceName;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s:%d (%s)", hostName, port, deviceName);
 	}
 }

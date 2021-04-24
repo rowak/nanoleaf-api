@@ -9,13 +9,12 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
+import com.github.rowak.nanoleafapi.NanoleafCallback;
 import com.github.rowak.nanoleafapi.NanoleafDevice;
 import com.github.rowak.nanoleafapi.NanoleafDeviceMeta;
 import com.github.rowak.nanoleafapi.NanoleafException;
 
 import net.straylightlabs.hola.dns.Domain;
-import net.straylightlabs.hola.sd.Instance;
-import net.straylightlabs.hola.sd.Query;
 import net.straylightlabs.hola.sd.Service;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -23,7 +22,7 @@ import okhttp3.Response;
 /**
  * A utility class with useful methods for managing Nanoleaf devices.
  */
-public class Setup {
+public class NanoleafSetup {
 	
 	public static int DEFAULT_PORT = 16021;
 	public static String NANOLEAF_MDNS_SERVICE = "_nanoleafapi._tcp";
@@ -47,6 +46,15 @@ public class Setup {
         	devices.add(NanoleafDeviceMeta.fromMDNSInstance(it.next()));
         }
         return devices;
+	}
+	
+	public static void findNanoleafDevicesAsync(NanoleafCallback<NanoleafDeviceMeta> callback, int timeout)
+			throws UnknownHostException, IOException {
+		Service service = Service.fromName(NANOLEAF_MDNS_SERVICE);
+        Query query = Query.createWithTimeout(service, Domain.LOCAL, timeout);
+        query.runAsync((instance) -> {
+        	callback.onCompleted(NanoleafCallback.SUCCESS, NanoleafDeviceMeta.fromMDNSInstance(instance), null);
+        });
 	}
 	
 	/**
