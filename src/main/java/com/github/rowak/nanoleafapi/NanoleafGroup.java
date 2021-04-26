@@ -31,10 +31,19 @@ public class NanoleafGroup {
 	
 	private Map<String, NanoleafDevice> devices;
 	
+	/**
+	 * Creates a new empty group. This operation is not networked.
+	 */
 	public NanoleafGroup() {
 		init(null);
 	}
 	
+	/**
+	 * Creates a new group from a set of existing devices. This operation is
+	 * not networked.
+	 * 
+	 * @param devices   a map containing devices mapped to their unique names
+	 */
 	public NanoleafGroup(Map<String, NanoleafDevice> devices) {
 		init(devices);
 	}

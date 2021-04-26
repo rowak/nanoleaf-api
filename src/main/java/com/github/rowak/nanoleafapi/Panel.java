@@ -33,44 +33,96 @@ public class Panel {
 	
 	/**
 	 * Gets the unique ID for the panel.
-	 * @return  the panel's unique ID
+	 * 
+	 * @return   the panel's unique ID
 	 */
 	public int getId() {
 		return id;
 	}
 	
+	/**
+	 * Sets the unique ID for the panel.
+	 * 
+	 * @param id   a unique ID for the panel
+	 */
 	public void setId(int id) {
 		this.id = id;
 	}
 	
+	/**
+	 * Gets the x value of this panel's location.
+	 * 
+	 * @return   the x value
+	 */
 	public int getX() {
 		return x;
 	}
 	
+	/**
+	 * Sets the x value of this panel's location.
+	 * 
+	 * @param x   the x value
+	 */
 	public void setX(int x) {
 		this.x = x;
 	}
 	
+	/**
+	 * Gets the y value of this panel's location.
+	 * 
+	 * @return   the y value
+	 */
 	public int getY() {
 		return y;
 	}
 	
+	/**
+	 * Sets the y value of this panel's location.
+	 * 
+	 * @param y   the y value
+	 */
 	public void setY(int y) {
 		this.y = y;
 	}
 	
+	/**
+	 * Gets the orientation of the panel in degrees.
+	 * 
+	 * @return   the panel orientation
+	 */
 	public int getOrientation() {
 		return orientation;
 	}
 	
+	/**
+	 * Sets the orientation of the panel in degrees.
+	 * 
+	 * @param orientation   the panel orientation
+	 */
 	public void setOrientation(int orientation) {
 		this.orientation = orientation;
 	}
 	
+	/**
+	 * <p>Gets the shape type of the panel.</p>
+	 * 
+	 * <p><b>Note:</b> this can normally be assumed for Aurora and Canvas devices,
+	 * but Shapes devices may contain more than one panel type.</p>
+	 * 
+	 * @return   the panel shape type
+	 */
 	public ShapeType getShape() {
 		return shape;
 	}
 	
+	/**
+	 * <p>Sets the shape type of the panel.</p>
+	 * 
+	 * <p><b>Note:</b> this can normally be assumed for Aurora and Canvas devices,
+	 * but Shapes devices may contain more than one panel type.</p>
+	 * 
+	 * @param shape   the panel shape type
+	 */
 	public void setShape(ShapeType shape) {
 		this.shape = shape;
 	}
