@@ -4,12 +4,33 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.rowak</groupId>
-  <artifactId>nanoleafapi</artifactId>
+  <groupId>io.github.rowak</groupId>
+  <artifactId>nanoleaf-api</artifactId>
   <version>0.0.1</version>
 
-  <name>nanoleaf-api</name>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>A synchronous/asynchronous Java library for Nanoleaf Aurora, Canvas, and Shapes</description>
   <url>https://github.com/rowak/nanoleaf-api</url>
+  
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Ethan Rowan</name>
+      <email>rowak12@gmail.com</email>
+    </developer>
+  </developers>
+  
+  <scm>
+    <connection>scm:git:git://github.com/rowak/nanoleaf-api.git</connection>
+    <developerConnection>scm:git:ssh://github.com:rowak/nanoleaf-api.git</developerConnection>
+    <url>http://github.com/rowak/nanoleaf-api/tree/master</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
