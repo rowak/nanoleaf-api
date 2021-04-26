@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Plugin {
+	
 	private String type;
 	private String uuid;
 	private JSONArray options;

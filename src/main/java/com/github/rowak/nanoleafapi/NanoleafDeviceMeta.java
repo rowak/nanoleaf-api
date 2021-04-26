@@ -6,9 +6,9 @@ import java.util.Iterator;
 import com.github.rowak.nanoleafapi.util.Instance;
 
 /**
- * An object for storing information related to an
- * Aurora device. This informtion is typically received
- * from mDNS/SSDP broadcast packets.
+ * An object for storing information related to a Nanoleaf device. This information
+ * is typically received from mDNS broadcast packets, however, this class can also
+ * be used separately as a simple storage for Nanoleaf devices.
  */
 public class NanoleafDeviceMeta {
 	
@@ -18,14 +18,13 @@ public class NanoleafDeviceMeta {
 	private String deviceName;
 	
 	/**
-	 * Creates a new <code>AuroraMetadata</code> object
-	 * using existing Aurora device information.
-	 * @param hostName  the hostname/ IP address of the Aurora
-	 * @param port  the port that the Aurora is using
-	 * @param deviceId  the unique device id for the Aurora
-	 * @param deviceName  the unique name for the Aurora
-	 * 					  (a combination of the device type
-	 * 					  and the MAC address)
+	 * Creates a new metadata object using existing Nanoleaf device information.
+	 * 
+	 * @param hostName     the hostname/ IP address of the device
+	 * @param port         the port that the device is using
+	 * @param deviceId     the unique device id for the device
+	 * @param deviceName   the unique name for the device (a combination of the
+	 *                     device type and the MAC address)
 	 */
 	public NanoleafDeviceMeta(String hostName, int port,
 			String deviceId, String deviceName) {
@@ -36,12 +35,12 @@ public class NanoleafDeviceMeta {
 	}
 	
 	/**
-	 * Creates a new <code>AuroraMetadata</code> object using
-	 * packet data from an mDNS broadcast.<br>
-	 * <b>Note: This is used internally by the api.</b>
-	 * @param instance  the packet data containing the
-	 * 			        Aurora device information
-	 * @return  a new <code>AuroraMetadata</code> object
+	 * <p>Creates a new metadata object using packet data from an mDNS broadcast.</p>
+	 * 
+	 * <p><b>Note:</b> This is used internally by the API.</p>
+	 * 
+	 * @param instance   the packet data containing the Nanoleaf device information
+	 * @return           a new metadata object
 	 */
 	public static NanoleafDeviceMeta fromMDNSInstance(Instance instance) {
 		NanoleafDeviceMeta metadata = new NanoleafDeviceMeta(null, 0, null, null);
@@ -55,33 +54,33 @@ public class NanoleafDeviceMeta {
 	}
 	
 	/**
-	 * Gets the name of the associated Aurora device.
-	 * @return  the name of the Aurora device
+	 * Gets the name of the associated Nanoleaf device.
+	 * @return  the name of the device
 	 */
 	public String getHostName() {
 		return hostName;
 	}
 	
 	/**
-	 * Sets the metadata host name of the associated Aurora device.<br>
-	 * <i>This does not affect the host name of the actual Aurora device.</i>
-	 * @param hostName  the host name of the Aurora
+	 * Sets the metadata host name of the associated Nanoleaf device.<br>
+	 * @param hostName  the host name of the device
 	 */
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
 	}
 	
 	/**
-	 * Gets the port of the associated Aurora device.
-	 * @return  the port of the Aurora device
+	 * Gets the port of the associated Nanoleaf device.
+	 * 
+	 * @return  the port of the Nanoleaf device
 	 */
 	public int getPort() {
 		return port;
 	}
 	
 	/**
-	 * Sets the port of the associated Aurora device.<br>
-	 * <i>This does not affect the port of the actual Aurora device.</i>
+	 * Sets the port of the associated Nanoleaf device.
+	 * 
 	 * @param port  the port of the Aurora
 	 */
 	public void setPort(int port) {
@@ -89,38 +88,42 @@ public class NanoleafDeviceMeta {
 	}
 	
 	/**
-	 * Gets the device id of the associated Aurora device.
-	 * @return  the device id of the Aurora device
+	 * Gets the device id of the associated Nanoleaf device.
+	 * 
+	 * @return  the device id of the device
 	 */
 	public String getDeviceId() {
 		return deviceId;
 	}
 	
 	/**
-	 * Sets the device id of the associated Aurora device.<br>
-	 * <i>This does not affect the device id of the actual Aurora device.</i>
-	 * @param deviceId  the device id of the Aurora
+	 * Sets the device id of the associated Nanoleaf device.
+	 * 
+	 * @param deviceId  the device id of the device
 	 */
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
 	}
 	
 	/**
-	 * Gets the device name of the associated Aurora device.
-	 * The device name is a combination of the device type
-	 * and the MAC address. For example, "Nanoleaf Light Panels 11:ab:2c".
-	 * @return  the device name of the Aurora device
+	 * Gets the device name of the associated Nanoleaf device. The device name is
+	 * either a combination of the device type and the MAC address, or a combination
+	 * of the device type and the model number. For example, "Nanoleaf Light Panels 11:ab:2c".
+	 * 
+	 * @return   the device name of the Nanoleaf device
 	 */
 	public String getDeviceName() {
 		return deviceName;
 	}
 	
 	/**
-	 * Sets the device name of the associated Aurora device.
-	 * The device name is a combination of the device type
-	 * and the MAC address. For example, "Nanoleaf Light Panels 11:ab:2c".<br>
-	 * <i>This does not affect the device name of the actual Aurora device.</i>
-	 * @param deviceName  the device name of the Aurora
+	 * <p>Sets the device name of the associated Nanoleaf device. The device name is either
+	 * a combination of the device type and the MAC address, or a combination of the
+	 * device type and model number. For example, "Nanoleaf Light Panels 11:ab:2c".</p>
+	 * 
+	 * <p><b>Note:</b> This does not affect the device name of the actual Nanoleaf device.</p>
+	 * 
+	 * @param deviceName   the device name of the device
 	 */
 	public void setDeviceName(String deviceName) {
 		this.deviceName = deviceName;

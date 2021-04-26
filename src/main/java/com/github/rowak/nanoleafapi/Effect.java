@@ -3,6 +3,9 @@ package com.github.rowak.nanoleafapi;
 import org.json.JSONObject;
 
 public class Effect {
+	
+	public static final String DEFAULT_VERSION = "2.0";
+	
 	private String name;
 	private String efType;
 	private String version;
@@ -79,11 +82,17 @@ public class Effect {
 		if (json.has("version")) {
 			effect.version = json.getString("version");
 		}
+		else {
+			effect.version = DEFAULT_VERSION;
+		}
 		if (json.has("colorType")) {
 			effect.colorType = json.getString("colorType");
 		}
 		if (json.has("palette")) {
 			effect.palette = Palette.fromJSON(json.getJSONArray("palette").toString());
+		}
+		else {
+			effect.palette = new Palette();
 		}
 		
 		return effect;

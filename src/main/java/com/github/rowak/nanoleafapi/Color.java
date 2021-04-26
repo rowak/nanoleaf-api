@@ -2,7 +2,11 @@ package com.github.rowak.nanoleafapi;
 
 import org.json.JSONObject;
 
+/**
+ * Convenience class for storing colors. Colors can be easily converted between HSB and RGB.
+ */
 public class Color {
+	
 	private int hue;
 	private int saturation;
 	private int brightness;
@@ -74,11 +78,12 @@ public class Color {
 	public static final Color ORANGE = fromRGB(255, 200, 0);
 	
 	/**
-	 * Creates an HSB instance of <code>Color</code>.
-	 * @param hue  the hue of the color
-	 * @param saturation  the saturation of the color
-	 * @param brightness  the brightness of the color
-	 * @return  a new <code>Color</code>
+	 * Creates a color from HSB components.
+	 * 
+	 * @param hue          the hue of the color
+	 * @param saturation   the saturation of the color
+	 * @param brightness   the brightness of the color
+	 * @return             a new <code>Color</code>
 	 */
 	public static Color fromHSB(int hue, int saturation, int brightness) {
 		Color color = new Color();
@@ -89,11 +94,12 @@ public class Color {
 	}
 	
 	/**
-	 * Creates an RGB instance of <code>Color</code>.
-	 * @param red  the red RGB value of the desired color
-	 * @param green  the green RGB value of the desired color
-	 * @param blue  the blue RGB value of the desired color
-	 * @return  a new <code>Color</code>
+	 * Creates a color from RGB components.
+	 * 
+	 * @param red     the red RGB value of the desired color
+	 * @param green   the green RGB value of the desired color
+	 * @param blue    the blue RGB value of the desired color
+	 * @return        a new <code>Color</code>
 	 */
 	public static Color fromRGB(int red, int green, int blue) {
 		float[] hsb = new float[3];
@@ -112,7 +118,8 @@ public class Color {
 	
 	/**
 	 * Gets the red RGB value of this color.
-	 * @return  the red RGB value
+	 * 
+	 * @return   the red RGB value
 	 */
 	public int getRed() {
 		return getRGB().getRed();
@@ -120,7 +127,8 @@ public class Color {
 	
 	/**
 	 * Gets the green RGB value of this color.
-	 * @return  the green RGB value
+	 * 
+	 * @return   the green RGB value
 	 */
 	public int getGreen() {
 		return getRGB().getGreen();
@@ -128,7 +136,8 @@ public class Color {
 	
 	/**
 	 * Gets the blue RGB value of this color.
-	 * @return  the blue value
+	 * 
+	 * @return   the blue value
 	 */
 	public int getBlue() {
 		return getRGB().getBlue();
@@ -136,7 +145,8 @@ public class Color {
 	
 	/**
 	 * Get the hue HSB value of this color.
-	 * @return  the hue
+	 * 
+	 * @return   the hue
 	 */
 	public int getHue() {
 		return hue;
@@ -144,7 +154,8 @@ public class Color {
 	
 	/**
 	 * Set the hue HSB value of this color.
-	 * @param hue  the desired hue
+	 * 
+	 * @param hue   the desired hue
 	 */
 	public void setHue(int hue) {
 		this.hue = hue;
@@ -152,6 +163,7 @@ public class Color {
 	
 	/**
 	 * Get the saturation HSB value of this color.
+	 * 
 	 * @return  the saturation
 	 */
 	public int getSaturation() {
@@ -160,7 +172,8 @@ public class Color {
 	
 	/**
 	 * Set the saturation HSB value of this color.
-	 * @param  saturation  the saturation
+	 * 
+	 * @param  saturation   the saturation
 	 */
 	public void setSaturation(int saturation) {
 		this.saturation = saturation;
@@ -168,7 +181,8 @@ public class Color {
 	
 	/**
 	 * Get the brightness HSB value  of this color.
-	 * @return  the brightness
+	 * 
+	 * @return   the brightness
 	 */
 	public int getBrightness() {
 		return brightness;
@@ -176,16 +190,27 @@ public class Color {
 	
 	/**
 	 * Set the brightness HSB value of this color.
-	 * @param  brightness  the brightness
+	 * 
+	 * @param   brightness  the brightness
 	 */
 	public void setBrightness(int brightness) {
 		this.brightness = brightness;
 	}
 	
+	/**
+	 * Gets the probability of this color appearing (only applicable to some effects).
+	 * 
+	 * @return   the probability
+	 */
 	public float getProbability() {
 		return probability;
 	}
 	
+	/**
+	 * Sets the probability of this color (only applicable to some affects).
+	 * 
+	 * @param probability   the probability
+	 */
 	public void setProbability(float probability) {
 		this.probability = probability;
 	}
@@ -197,8 +222,9 @@ public class Color {
 	
 	/**
 	 * Checks if two colors are equal based on their h,s,v, and p values.
-	 * @param other  the color to compare this color to
-	 * @return  true, if the colors are equal
+	 * 
+	 * @param other   the color to compare this color to
+	 * @return        true, if the colors are equal
 	 */
 	@Override
 	public boolean equals(Object other) {
@@ -211,6 +237,11 @@ public class Color {
 		return false;
 	}
 
+	/**
+	 * Converts the color into JSON.
+	 * 
+	 * @return   a JSON color
+	 */
 	public JSONObject toJSON() {
 		JSONObject json = new JSONObject();
 		json.put("hue", hue);
@@ -220,6 +251,12 @@ public class Color {
 		return json;
 	}
 
+	/**
+	 * Creates a new color from JSON.
+	 * 
+	 * @param json   the JSON color to convert
+	 * @return       a new color
+	 */
 	public static Color fromJSON(JSONObject json) {
 		Color color = new Color();
 		if (!json.has("hue")) {

@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Palette {
+	
 	private List<Color> colors;
 
 	public Palette() {
 		colors = new ArrayList<Color>();
 	}
 	
-	public Color[] getColors() {
-		return colors.toArray(new Color[0]);
+	public List<Color> getColors() {
+		ArrayList<Color> temp = new ArrayList<Color>();
+		temp.addAll(colors);
+		return temp;
 	}
 	
 	public void addColor(Color color) {

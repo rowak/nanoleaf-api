@@ -2,6 +2,10 @@ package com.github.rowak.nanoleafapi;
 
 import com.github.rowak.nanoleafapi.util.HttpUtil;
 
+/**
+ * The main callback interface for asynchronous requests.
+ * @param <T>   the type that is being requested/returned
+ */
 public interface NanoleafCallback<T> {
 	
 	/** An internal API error, or the device returned an impossible (but http-allowable) response.
@@ -54,10 +58,11 @@ public interface NanoleafCallback<T> {
 	 * <li>{@link NanoleafCallback#UNPROCESSABLE_ENTITY}</li>
 	 * <li>{@link NanoleafCallback#INTERNAL_SERVER_ERROR}</li>
 	 * </ul>
-	 * @param status  the response status (see above status codes)
-	 * @param data  the response data; only set when the status code is SUCCESS (1),
-	 * 				otherwise null
-	 * @param device  the device that has completed
+	 * 
+	 * @param status   the response status (see above status codes)
+	 * @param data     the response data; only set when the status code is SUCCESS (1),
+	 * 				   otherwise null
+	 * @param device   the device that has completed
 	 */
 	public void onCompleted(int status, T data, NanoleafDevice device);
 }

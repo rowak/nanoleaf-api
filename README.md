@@ -1,5 +1,12 @@
 # Nanoleaf Java Library
-This is a extensive synchronous and asynchronous Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are (will be) supported.
+This is an extensive synchronous and asynchronous Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are (will be) supported.
+
+This library is the successor to my old Aurora Java library. It has a significant number of improvements, including:
+- Nanoleaf Shapes and Canvas devices are supported
+- Asynchronous methods
+- Helper classes for group devices
+- Effects class redesigned for Effect v2
+- Many broken features have been fixed
 
 ## Documentation (not yet ready)
 
@@ -13,18 +20,18 @@ First, search for all of the existing Nanoleaf devices connected to your local n
 
 ```Java
 int timeout = 2000;
-List<NanoleafDeviceMeta> devices = NanoleafDevice.findDevices(timeout);
+List<NanoleafDeviceMeta> devices = NanoleafSetup.findDevices(timeout);
 ```
 
 Next create an access token to authenticate with the device. You must first physically hold down the power button on your device for 5-7 seconds until the LED starts flashing before running the following code. Make sure to write down your access token for future use, however you can create as many as you like.
 ```Java
-String accessToken = NanoleafDevice.createAccessToken()
+String accessToken = NanoleafSetup.createAccessToken()
 ```
 
 Finally, you can connect to a device using the following code. Select any device from the devices list to connect to.
 ```Java
 NanoleafDeviceMeta meta = ...
-NanoleafDevice device = NanoleafDevice.createDevice(meta, accessToken);
+NanoleafDevice device = NanoleafSetup.createDevice(meta, accessToken);
 ```
 
 You can also create devices if you already know their type. For example:
@@ -125,16 +132,33 @@ for (int i = 0; i < 4; i++)
 You can also send much more complicated static and animated effects very quickly using external streaming.
 
 ## The Effect Class
+There are three types of effects: plugins, static, and custom. Plugins (also called motions) are effects written using the Nanoleaf SDK (C++) that define how effects should be rendered. Most effects are of this type. Static effects are motionless effects that can be used for displaying a still image or setting the color of all the panels. Custom effects are frame-by-frame animations that are very customizable.
 
-### Effect Builders
+### Custom Effects
+Custom effects allow you to create highly customizable animations. A custom effect is made up of a sequence of frames defined for each panel, where each frame has a color and a set time that it takes to transition to that color.
 
-#### Custom Effects
+The following example creates a custom effect that cycles through a few colors on all the panels with various transition times.
 
-#### Static Effects
+```Java
+CustomEffect ef = new CustomEffect.Builder(device)
+                    .addFrameToAllPanels(new Frame(Color.RED, 3))
+				    .addFrameToAllPanels(new Frame(Color.ORANGE, 10))
+				    .addFrameToAllPanels(new Frame(Color.YELLOW, 5))
+				    .addFrameToAllPanels(new Frame(Color.GREEN, 7))
+				    .addFrameToAllPanels(new Frame(Color.BLUE, 3))
+				    .addFrameToAllPanels(new Frame(Color.MAGENTA, 11))
+				    .build("My Animation", true);  // build an animation called "My Animation" that loops
+device.displayEffect(ef);
+```
 
-## Events
+### Static Effects
+Static effects are a subset of custom effects; they are created very similarly but they can only have one frame per panel. Static effects are created using the StaticEffect.Builder class.
+
+## Events (WIP)
+Events have not yet been fully implemented.
 
 ## Schedules (WIP)
+Schedules have not yet been fully implemented. In fact, they are completely broken on the latest firmware.
 
 ## Asynchronous
 Almost every synchronous method that communicates with the Nanoleaf device has an accompanying asynchronous method. The naming scheme for these methods is "methodName...Async" (for example, turnOn() and turnOnAsync()).

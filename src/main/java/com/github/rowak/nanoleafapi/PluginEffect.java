@@ -3,6 +3,7 @@ package com.github.rowak.nanoleafapi;
 import org.json.JSONObject;
 
 public class PluginEffect extends Effect {
+	
 	private Plugin plugin;
 	
 	public Plugin getPlugin() {

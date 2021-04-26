@@ -5,16 +5,23 @@ import java.net.InetSocketAddress;
 
 import org.json.JSONObject;
 
+import okhttp3.OkHttpClient;
+
+/**
+ * The Aurora class is one of the three main concrete classes for creating a NanoleafDevice.
+ * This class should only be used to connect to physical Aurora devices. For other devices
+ * such as the Canvas or Hexagons, use the Canvas and Shapes classes, respectively.
+ */
 public class Aurora extends NanoleafDevice {
 	
 	/**
-	 * Creates a new instance of the Aurora controller.
-	 * @param hostname  the hostname of the controller
-	 * @param port  the port of the controller (default=16021)
-	 * @param accessToken  a unique authentication token
-	 * @throws NanoleafException  if the access token is invalid
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * Creates a new instance of the Aurora.
+	 * 
+	 * @param hostname             the hostname of the Aurora
+	 * @param port                 the port of the controller (default=16021)
+	 * @param accessToken          a unique authentication token
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Aurora(String hostname, int port, String accessToken)
 			throws NanoleafException, IOException {
@@ -22,12 +29,12 @@ public class Aurora extends NanoleafDevice {
 	}
 	
 	/**
-	 * Creates a new instance of the Aurora controller.
-	 * @param hostname  the hostname of the controller
-	 * @param accessToken  a unique authentication token
-	 * @throws NanoleafException  if the access token is invalid
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * Creates a new instance of the Aurora.
+	 * 
+	 * @param hostname             the hostname of the Aurora
+	 * @param accessToken          a unique authentication token
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Aurora(String hostname, String accessToken)
 			throws NanoleafException, IOException {
@@ -35,39 +42,41 @@ public class Aurora extends NanoleafDevice {
 	}
 	
 	/**
-	 * Gets the number of panels connected to the Aurora controller.
-	 * @param includeRhythm  whether or not to include the Rhythm as a panel
-	 * 		   (inluded by default in the OpenAPI)
-	 * @return  the number of panels
-	 * @throws UnauthorizedException  if the access token is invalid
+	 * Asynchronously creates a new instance of the Aurora.
+	 * 
+	 * @param hostname             the hostname of the Aurora
+	 * @param port                 the port of the Aurora (default=16021)
+	 * @param accessToken          a unique authentication token
+	 * @param callback             the callback that is called when the device has
+	 *                             been initialized
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
 	 */
-	@Override
-	public int getNumPanels(boolean includeRhythm)
-			throws NanoleafException, IOException {
-		int numPanels = Integer.parseInt(get(getURL("panelLayout/layout/numPanels")));
-		if (!includeRhythm || !isRhythmConnected())
-			numPanels--;
-		return numPanels;
-	}
-	
-	@Override
-	public void getNumPanelsAsync(boolean includeRhythm, NanoleafCallback<Integer> callback)
-			throws NanoleafException, IOException {
-		isRhythmConnectedAsync((status, data, device) -> {
-			if (status != NanoleafCallback.SUCCESS) {
-				callback.onCompleted(status, 0, device);
-			}
-			getAsyncInt(getURL("panelLayout/layout/numPanels"), (status2, data2, device2) -> {
-				if (!includeRhythm || data) {
-					data2--;
-				}
-				callback.onCompleted(status2, data2, device2);
-			});
-		});
+	public Aurora(String hostname, int port, String accessToken, NanoleafCallback<Aurora> callback) {
+		super(hostname, port, accessToken, callback);
 	}
 	
 	/**
-	 * Indicates if the Rhythm is connected to the Light Panels or not.
+	 * Asynchronously creates a new instance of the Aurora.
+	 * 
+	 * @param hostname             the hostname of the Aurora
+	 * @param accessToken          a unique authentication token
+	 * @param callback             the callback that is called when the device has
+	 *                             been initialized
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
+	 */
+	public Aurora(String hostname, String accessToken, NanoleafCallback<Aurora> callback) {
+		super(hostname, DEFAULT_PORT, accessToken, callback);
+	}
+	
+	protected Aurora(String hostname, int port, String accessToken, OkHttpClient client)
+			throws NanoleafException, IOException {
+		super(hostname, port, accessToken, client);
+	}
+	
+	/**
+	 * Indicates if the Rhythm is connected to the Aurora or not.
 	 * @return  true, if the Rhythm is connected
 	 * @throws UnauthorizedException  if the access token is invalid
 	 */

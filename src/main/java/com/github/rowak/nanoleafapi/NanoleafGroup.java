@@ -559,7 +559,7 @@ public class NanoleafGroup {
 		custom.setVersion("1.0"); // ?
 		custom.setAnimationData("1 " + panelId + " 1 " +
 				red + " " + green + " " + blue + " 0 " + transitionTime);
-		custom.setLoop(false);
+		custom.setLoopEnabled(false);
 		displayEffect(custom);
 	}
 //	
@@ -641,22 +641,6 @@ public class NanoleafGroup {
 	
 	public void writeEffectAsync(String command, NanoleafCallback<String> callback) {
 		devices.forEach((n, d) -> d.writeEffectAsync(command, callback));
-	}
-	
-	/**
-	 * Gets the number of panels connected to the Aurora controller.
-	 * @param includeRhythm  whether or not to include the Rhythm as a panel
-	 * 		   (inluded by default in the OpenAPI)
-	 * @return  the number of panels
-	 * @throws UnauthorizedException  if the access token is invalid
-	 */
-	public int getTotalNumPanels(boolean includeRhythm)
-			throws NanoleafException, IOException {
-		int numPanels = 0;
-		for (NanoleafDevice d : devices.values()) {
-			numPanels += d.getNumPanels(includeRhythm);
-		}
-		return numPanels;
 	}
 	
 //	/**

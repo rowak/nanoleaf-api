@@ -3,13 +3,26 @@ package com.github.rowak.nanoleafapi;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A storage class for panels from a Nanoleaf Device.
+ */
 public class Panel {
+	
 	private int id;
 	private int x;
 	private int y;
 	private int orientation;
 	private ShapeType shape;
 	
+	/**
+	 * Creates a new panel.
+	 * 
+	 * @param id            a unique, positive ID number
+	 * @param x             the x coordinate position of the panel
+	 * @param y             the y coordinate position of the panel
+	 * @param orientation   the orientation of the panel in degrees
+	 * @param shape         the shape type of the panel
+	 */
 	public Panel(int id, int x, int y, int orientation, ShapeType shape) {
 		this.id = id;
 		this.x = x;
