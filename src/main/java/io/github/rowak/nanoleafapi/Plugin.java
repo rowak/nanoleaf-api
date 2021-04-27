@@ -141,7 +141,12 @@ public class Plugin {
 		JSONObject json = new JSONObject();
 		json.put("pluginType", type);
 		json.put("pluginUuid", uuid);
-		json.put("pluginOptions", options.toString());
+		if (options != null) {
+			json.put("pluginOptions", options);
+		}
+		else {
+			json.put("pluginOptions", new JSONArray());
+		}
 		return json;
 	}
 
@@ -164,5 +169,10 @@ public class Plugin {
 			plugin.options = json.getJSONArray("pluginOptions");
 		}
 		return plugin;
+	}
+	
+	@Override
+	public String toString() {
+		return toJSON().toString();
 	}
 }

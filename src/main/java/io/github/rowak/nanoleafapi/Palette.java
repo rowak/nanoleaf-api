@@ -25,6 +25,24 @@ public class Palette {
 		}
 	}
 	
+	public static class Builder {
+		
+		private List<Color> colors;
+		
+		public Builder() {
+			colors = new ArrayList<Color>();
+		}
+		
+		public Builder addColor(Color color) {
+			colors.add(color);
+			return this;
+		}
+		
+		public Palette build() {
+			return new Palette(colors);
+		}
+	}
+	
 	/**
 	 * Creates an empty palette.
 	 */
@@ -110,4 +128,14 @@ public class Palette {
 		}
 		return palette;
 	}
+	
+	@Override
+	public String toString() {
+		return colors.toString();
+	}
+	
+//	@Override
+//	public boolean equals(Object obj) {
+//		
+//	}
 }

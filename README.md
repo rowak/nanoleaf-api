@@ -100,13 +100,31 @@ device.renameEffect(effectName, newName);
 device.previewEffect(effect);
 ```
 
+The following example creates a new plugin effect from scratch using the "wheel" plugin:
+```Java
+PluginEffect eff = new PluginEffect();
+Plugin p = PluginTemplates.getWheelTemplate(); // Plugin templates allow for easier effect creation
+p.putOption("transTime", 10);                  // Change the default transition time to 10
+eff.setPlugin(p);
+eff.setName("My Animation");
+eff.setVersion("2.0");                         // Effect v2.0 is the latest version
+eff.setEffectType("plugin");
+eff.setColorType("HSB");
+eff.setPalette(new Palette.Builder()
+				.addColor(Color.RED)
+				.addColor(Color.GREEN)
+				.addColor(Color.BLUE)
+				.build());
+device.addEffect(eff);
+```
+
 ### Panel Layout
 Information about the arrangement of a Nanoleaf device's panels can be retrieved. Below are a few examples.
 ```Java
 int numPanels = device.getNumPanels();
 int sideLength = device.getSideLength();
-Panel[] panels = device.getPanels();
-Panel[] panels = device.getPanelsRotated();
+List<Panel> panels = device.getPanels();
+List<Panel> panels = device.getPanelsRotated();
 ```
 
 ### Rhythm (Aurora only)
@@ -123,10 +141,10 @@ External streaming is a useful feature that allows for fast and continuous updat
 
 The following example initializes external streaming mode, then sets a few panels to purple.
 ```Java
-Panel[] panels = device.getPanels();
+List<Panel> panels = device.getPanels();
 device.enableExternalStreaming();                               // enable external streaming
 for (int i = 0; i < 4; i++)
-    device.setPanelExternalStreaming(panels[i], "#FF00FF", 1);  // set a few panels to purple
+    device.setPanelExternalStreaming(panels.get(i), "#FF00FF", 1);  // set a few panels to purple
 ```
 
 You can also send much more complicated static and animated effects very quickly using external streaming.
@@ -165,6 +183,10 @@ Almost every synchronous method that communicates with the Nanoleaf device has a
 
 Asynchronous methods take a parameterized `NanoleafCallback` object as an additional argument, which is a callback interface. When the task completes, NanoleafCallback.onCompleted(status, data, device) is called which returns three parameters. The first parameter (status) indicates the completion status of the task, and on success, is set to NanoleafCallback.SUCCESS. The second parameter (data) returns the data expected to be returned by the task, or null if the task did not succeed. The third parameter (device) is the `NanoleafDevice` object of the device that completed the task.
 
+Note that you should close all Nanoleaf devices that use asynchronous methods when you are done using the device (such as just before the application terminates). If you fail to do this, the program will hang when the main thread runs out of code to execute, since other threads will still be running. You can close a Nanoleaf device using the `NanoleafDevice.closeAsync()` method.
+
+Also note that asynchronous requests can *not* be chained together. By this I mean you can't create a second asynchronous request inside the *callback* for an asynchronous request. This will always result with a NanoleafCallback.FAILURE response status. You can however create synchronous requests inside the callback for any asynchronous request as a workaround.
+
 The following example gets all of the effects on a Nanoleaf device asynchronously:
 ```Java
 device.getAllEffectsAsync((status, effects, device) -> {
@@ -175,6 +197,8 @@ device.getAllEffectsAsync((status, effects, device) -> {
         // uh oh
     }
 });
+...
+device.closeAsync(); // close when you're done!
 ```
 
 ## Exceptions
@@ -182,3 +206,5 @@ device.getAllEffectsAsync((status, effects, device) -> {
 This exception will be thrown if an HTTP error code is returned from the Nanoleaf device. You may run into the following error codes:
 - 401 (Unauthorized)  --  Thrown if you try to use methods from a Nanoleaf device with an invalid access token
 - 422 (Unprocessable entity)  --  Thrown if the Nanoleaf device rejects the arguments you provided for a method 
+
+Note that exceptions should not be thrown when using the asynchronous methods. These methods use status codes for error reporting.

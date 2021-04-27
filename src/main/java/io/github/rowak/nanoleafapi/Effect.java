@@ -1,5 +1,6 @@
 package io.github.rowak.nanoleafapi;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -171,7 +172,12 @@ public class Effect {
 			effect.colorType = json.getString("colorType");
 		}
 		if (json.has("palette")) {
-			effect.palette = Palette.fromJSON(json.getJSONArray("palette").toString());
+			try {
+				// The palette may be null
+				effect.palette = Palette.fromJSON(json.getJSONArray("palette").toString());
+			} catch (JSONException e) {
+				effect.palette = new Palette();
+			}
 		}
 		else {
 			effect.palette = new Palette();
@@ -187,7 +193,7 @@ public class Effect {
 	 * @param json   the effect JSON
 	 * @return       a new effect
 	 */
-	public static Effect createFromJSON(JSONObject json) {
+	public static final Effect createFromJSON(JSONObject json) {
 		if (json.has("animType")) {
 			String type = json.getString("animType");
 			if (type.equals("plugin") || type.equals("rhythm")) {
@@ -213,7 +219,7 @@ public class Effect {
 	 * @param json   the effect JSON
 	 * @return       a new effect
 	 */
-	public static Effect createFromJSON(String json) {
+	public static final Effect createFromJSON(String json) {
 		return createFromJSON(new JSONObject(json));
 	}
 	
@@ -226,6 +232,9 @@ public class Effect {
 	 * @return       a new effect
 	 */
 	public static Effect fromJSON(String json) {
+		if (json == null) {
+			return null;
+		}
 		return fromJSON(new JSONObject(json));
 	}
 	

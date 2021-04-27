@@ -128,7 +128,7 @@ public class CustomEffect extends Effect {
 	 */
 	public static class Builder {
 		
-		private Panel[] panels;
+		private List<Panel> panels;
 		private Map<Integer, List<Frame>> frames;
 		
 		/**
@@ -151,7 +151,7 @@ public class CustomEffect extends Effect {
 		 * 
 		 * @param panels  the panel data
 		 */
-		public Builder(Panel[] panels) {
+		public Builder(List<Panel> panels) {
 			this.panels = panels;
 			frames = new HashMap<Integer, List<Frame>>();
 			for (Panel panel : panels)
@@ -169,7 +169,7 @@ public class CustomEffect extends Effect {
 		 * @param device     the target device that the effect will be displayed on
 		 * @param callback   the callback to receive the builder
 		 */
-		public void createBuilderAsync(NanoleafDevice device, NanoleafCallback<Builder> callback) {
+		public static void createBuilderAsync(NanoleafDevice device, NanoleafCallback<Builder> callback) {
 			device.getPanelsAsync((status, data, deviceCaller) -> {
 				if (status != NanoleafCallback.SUCCESS) {
 					callback.onCompleted(NanoleafCallback.FAILURE, null, deviceCaller);
@@ -208,8 +208,8 @@ public class CustomEffect extends Effect {
 			}
 			StringBuilder data = new StringBuilder();
 			data.append(numPanels);
-			for (int i = 0; i < panels.length; i++) {
-				Panel panel = panels[i];
+			for (int i = 0; i < panels.size(); i++) {
+				Panel panel = panels.get(i);
 				int numFrames = frames.get(panel.getId()).size();
 				if (numFrames > 0) {
 					data.append(" " + panel.getId() + " " + numFrames);

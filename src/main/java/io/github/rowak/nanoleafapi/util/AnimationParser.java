@@ -15,6 +15,7 @@ import io.github.rowak.nanoleafapi.StaticEffect;
  * This class allows you to get the frames for any panel in a custom effect.
  */
 public class AnimationParser {
+	
 	private String animData;
 	private Map<Integer, List<Frame>> framesByNum;
 	private Map<Integer, List<Frame>> framesByPanel;

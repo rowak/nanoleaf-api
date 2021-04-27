@@ -38,6 +38,9 @@ public abstract class NanoleafDevice {
 	/** The default port used by all Nanoleaf devices */
 	public static final int DEFAULT_PORT = 16021;
 	
+	/** The port for external streaming v2 */
+	public static final int EXTERNAL_STREAMING_PORT = 60222;
+	
 	/** Internal HTTP client for communications with the Nanoleaf device */
 	private OkHttpClient client;
 	
@@ -69,7 +72,7 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public static NanoleafDevice createDevice(String hostname, int port, String accessToken)
+	public static final NanoleafDevice createDevice(String hostname, int port, String accessToken)
 			throws NanoleafException, IOException {
 		OkHttpClient client = new OkHttpClient.Builder().readTimeout(0, TimeUnit.SECONDS).build();
 		Response resp = HttpUtil.getHttpSync(client, getURL("", hostname, port, accessToken));
@@ -93,7 +96,7 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public static void createDeviceAsync(String hostname, int port, String accessToken, NanoleafCallback<NanoleafDevice> callback)
+	public static final void createDeviceAsync(String hostname, int port, String accessToken, NanoleafCallback<NanoleafDevice> callback)
 			throws NanoleafException, IOException {
 		if (callback == null) {
 			/* If the callback is not defined, it is impossible for the HTTP client to be
@@ -134,7 +137,7 @@ public abstract class NanoleafDevice {
 	
 	/* Attempts to create the appropriate device type using the Nanoleaf device's internal name
 	   and supplies a default HTTP client. A null client will create a new client */
-	private static NanoleafDevice createDeviceFromName(String name,
+	private static final NanoleafDevice createDeviceFromName(String name,
 			String hostname, int port, String accessToken, OkHttpClient client)
 					throws NanoleafException, IOException {
 		name = name.toLowerCase();
@@ -316,10 +319,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the firmware version of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the firmware version
 	 */
@@ -366,10 +368,9 @@ public abstract class NanoleafDevice {
 	 * <p>Asynchronously causes the panels to flash in unison. This is typically
 	 * used to help users differentiate between multiple panels.</p>
 	 *
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   called when the identify animation begins or when an error occurs
 	 */
@@ -392,15 +393,14 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the on state of the device (true = on, false = off).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the on state
 	 */
-	public void getOnAsync(NanoleafCallback<String> callback) {
-		getAsync(getURL("state/on/value"), callback);
+	public void getOnAsync(NanoleafCallback<Boolean> callback) {
+		getAsyncBool(getURL("state/on/value"), callback);
 	}
 	
 	/**
@@ -419,10 +419,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously sets the on state of the device (true = on, false = off).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param on         whether the device should be turned on or off
 	 * @param callback   called when the device changes power state or when an error occurs
@@ -438,27 +437,44 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public void toggleOn()
+	public boolean toggleOn()
 			throws NanoleafException, IOException {
-		setOn(!this.getOn());
+		boolean on = getOn();
+		setOn(!on);
+		return !on;
 	}
 	
 	/**
 	 * <p>Toggles the on state of the device (on = off, off = on).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback             called when the the device changes
 	 *                             power state or if error occurs
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public void toggleOnAsync(NanoleafCallback<String> callback)
+	public void toggleOnAsync(NanoleafCallback<Boolean> callback)
 			throws NanoleafException, IOException {
-		setOnAsync(!this.getOn(), callback);
+		getOnAsync((status, on, device) -> {
+			if (status != NanoleafCallback.SUCCESS) {
+				callback.onCompleted(status, null, device);
+			}
+			else {
+				try {
+					setOn(!on);
+					callback.onCompleted(NanoleafCallback.SUCCESS, !on, device);
+				}
+				catch (NanoleafException e) {
+					callback.onCompleted(status, !on, device);
+				}
+				catch (Exception e) {
+					callback.onCompleted(NanoleafCallback.FAILURE, null, device);
+				}
+			}
+		});
 	}
 	
 	/**
@@ -476,10 +492,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the master brightness of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the brightness of the device
 	 */
@@ -504,10 +519,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously sets the master brightness of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param brightness   the new brightness level as a percent
 	 * @param callback     called when the brightness is changed or when an error occurs
@@ -539,10 +553,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously fades the master brightness of the device over a period of time.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param brightness   the new brightness level as a percent
 	 * @param duration     the fade time, in seconds
@@ -570,10 +583,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously increases the brightness by an amount as a percent.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param amount     the amount to increase by
 	 * @param callback   called when the brightness changes or when an error occurs
@@ -598,10 +610,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously decreases the brightness by an amount as a percent.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param amount     the amount to decrease by
 	 * @param callback   called when the brightness changes or when an error occurs
@@ -625,10 +636,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the maximum brightness of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the maximum brightness
 	 */
@@ -651,10 +661,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the minimum brightness of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the minimum brightness
 	 */
@@ -677,10 +686,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the hue of the device (static/custom effects only).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the hue
 	 */
@@ -703,6 +711,21 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Asynchronously sets the hue of the device (static/custom effects only).</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param hue        the new hue
+	 * @param callback   called when the hue changes or when an error occurs
+	 */
+	public void setHueAsync(int hue, NanoleafCallback<String> callback) {
+		String body = String.format("{\"hue\": {\"value\": %d}}", hue);
+		putAsync(getURL("state"), body, callback);
+	}
+	
+	/**
 	 * Increases the hue by a set amount.
 	 * 
 	 * @param amount               the amount to increase by
@@ -718,10 +741,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously increases the hue by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to increase by
@@ -747,10 +770,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously decreases the hue by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to decrease by
@@ -775,11 +798,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the maximum hue of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the maximum hue
 	 */
@@ -802,11 +823,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the minimum hue of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the minimum hue
 	 */
@@ -829,11 +848,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the saturation of the device (static/custom effects only).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the saturation
 	 */
@@ -858,10 +875,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously sets the saturation of the device (static/custom effects only).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param saturation   the new saturation
@@ -888,10 +905,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously increases the saturation by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to increase by
@@ -917,10 +934,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously decreases the saturation by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to decrease by
@@ -945,11 +962,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the maximum saturation of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the maximum saturation
 	 */
@@ -972,11 +987,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the minimum saturation of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the minimum saturation
 	 */
@@ -1000,11 +1013,9 @@ public abstract class NanoleafDevice {
 	 * <p>Asynchronously gets the color temperature of the device (color temperature
 	 * effect only).</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the color temperature
 	 */
@@ -1030,10 +1041,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously sets the color temperature of the device in Kelvin.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param colorTemperature   color temperature in Kelvin
@@ -1061,10 +1072,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously increases the color temperature by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to increase by
@@ -1091,10 +1102,10 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously decreases the color temperature by a set amount.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
 	 * (either an empty string or null).</p>
 	 * 
 	 * @param amount     the amount to decrease by
@@ -1120,11 +1131,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the maximum color temperature of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the maximum color temperature
 	 */
@@ -1147,15 +1156,13 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the minimum color temperature of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the minimum color temperature
 	 */
-	public void getMinColorTemperature(NanoleafCallback<Integer> callback) {
+	public void getMinColorTemperatureAsync(NanoleafCallback<Integer> callback) {
 		getAsyncInt(getURL("state/ct/min"), callback);
 	}
 	
@@ -1174,11 +1181,9 @@ public abstract class NanoleafDevice {
 	/**
 	 * <p>Asynchronously gets the color mode of the device.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
-	 * internal API error occurs, it will instead return
-	 * {@link NanoleafCallback.FAILURE}. The returned data will never be meaningful
-	 * (either an empty string or null).</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
 	 * 
 	 * @param callback   returns the color mode
 	 */
@@ -1228,6 +1233,15 @@ public abstract class NanoleafDevice {
 		return get(getURL("effects/select")).replace("\"", "");
 	}
 	
+	/**
+	 * <p>Gets the name of the currently selected effect on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the current effect name
+	 */
 	public void getCurrentEffectNameAsync(NanoleafCallback<String> callback) {
 		getAsync(getURL("effects/select"), (status, data, device) -> {
 			callback.onCompleted(status, data.replace("\"", ""), device);
@@ -1235,7 +1249,7 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
-	 * Gets the currently selected effect as an <code>Effect</code> object.
+	 * Gets the currently selected effect as an Effect object.
 	 * 
 	 * @return                     the effect object
 	 * @throws NanoleafException   If the access token is invalid, or the
@@ -1243,16 +1257,35 @@ public abstract class NanoleafDevice {
 	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Effect getCurrentEffect()
-			throws NanoleafException, IOException, InterruptedException {
+			throws NanoleafException, IOException {
 		return getEffect(getCurrentEffectName());
 	}
 	
+	/**
+	 * <p>Asynchronously gets the currently selected effect as an <code>Effect</code> object.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the current effect
+	 */
 	public void getCurrentEffectAsync(NanoleafCallback<Effect> callback) {
 		getCurrentEffectNameAsync((status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
 				callback.onCompleted(status, null, device);
+				return;
 			}
-			getEffectAsync(data, callback);
+			try {
+				Effect ef = getEffect(data);
+				callback.onCompleted(NanoleafCallback.SUCCESS, ef, device);
+			}
+			catch (NanoleafException e) {
+				callback.onCompleted(e.getCode(), null, device);
+			}
+			catch (Exception e) {
+				callback.onCompleted(NanoleafCallback.FAILURE, null, device);
+			}
 		});
 	}
 	
@@ -1271,6 +1304,20 @@ public abstract class NanoleafDevice {
 		put(getURL("effects"), body);
 	}
 	
+	/**
+	 * <p>Sets the selected effect on the device to the effect specified by
+	 * <code>effectName</code>.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#NOT_FOUND} if the effect does not exist. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.
+	 * The returned data will never be meaningful (either an empty string or null).</p>
+	 * 
+	 * @param effectName   the name of the effect
+	 * @param callback     called when the selected effect is changed or when
+	 *                     an error occurs
+	 */
 	public void setEffectAsync(String effectName, NanoleafCallback<String> callback) {
 		String body = String.format("{\"select\": \"%s\"}", effectName);
 		putAsync(getURL("effects"), body, callback);
@@ -1285,14 +1332,50 @@ public abstract class NanoleafDevice {
 	 */
 	public void setRandomEffect()
 			throws NanoleafException, IOException {
-		String[] effects = getEffectsList();
+		List<String> effects = getEffectsList();
 		String currentEffect = getCurrentEffectName();
 		String effect = currentEffect;
 		while (effect.equals(currentEffect)) {
-			int i = new Random().nextInt(effects.length);
-			effect = effects[i];
+			int i = new Random().nextInt(effects.size());
+			effect = effects.get(i);
 		}
 		setEffect(effect);
+	}
+	
+	/**
+	 * <p>Asynchronously sets a random effect based on the effects installed on the
+	 * device controller. This includes dynamic as well as Rhythm effects.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.
+	 * The returned data will never be meaningful (either an empty string or null).</p>
+	 * 
+	 * @param callback   called when the current effect is changed or when
+	 *                   an error occurs
+	 */
+	public void setRandomEffectAsync(NanoleafCallback<String> callback) {
+		getEffectsListAsync((status, effects, device) -> {
+			if (status != NanoleafCallback.SUCCESS) {
+				callback.onCompleted(status, null, device);
+			}
+			try {
+				String currentEffect = getCurrentEffectName();
+				String effect = currentEffect;
+				while (effect.equals(currentEffect)) {
+					int i = new Random().nextInt(effects.size());
+					effect = effects.get(i);
+				}
+				setEffect(effect);
+				callback.onCompleted(NanoleafCallback.SUCCESS, effect, device);
+			}
+			catch (NanoleafException e) {
+				callback.onCompleted(e.getCode(), "", device);
+			}
+			catch (Exception e) {
+				callback.onCompleted(NanoleafCallback.FAILURE, null, device);
+			}
+		});
 	}
 	
 	/**
@@ -1303,93 +1386,127 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public String[] getEffectsList()
+	public List<String> getEffectsList()
 			throws NanoleafException, IOException {
 		JSONArray json = new JSONArray(get(getURL("effects/effectsList")));
-		String[] effects = new String[json.length()];
+		List<String> effects = new ArrayList<String>();
 		for (int i = 0; i < json.length(); i++)
-			effects[i] = json.getString(i);
+			effects.add(json.getString(i));
 		return effects;
 	}
 	
-	public void getEffectsListAsync(NanoleafCallback<String[]> callback) {
+	/**
+	 * <p>Asynchronously gets a string array of all the effects installed on the device. This
+	 * includes static, dynamic, and Rhythm effects.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.If an
+	 * internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.
+	 * The returned data will never be meaningful (either an empty string or null).</p>
+	 * 
+	 * @param callback   returns the effects list
+	 */
+	public void getEffectsListAsync(NanoleafCallback<List<String>> callback) {
 		getAsync(getURL("effects/effectsList"), (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
 				callback.onCompleted(status, null, device);
 			}
 			JSONArray json = new JSONArray(data);
-			String[] effects = new String[json.length()];
+			List<String> effects = new ArrayList<String>();
 			for (int i = 0; i < json.length(); i++)
-				effects[i] = json.getString(i);
+				effects.add(json.getString(i));
 			callback.onCompleted(status, effects, device);
 		});
 	}
 	
 	/**
-	 * Creates an <code>Effect</code> object from the JSON data for the effect
-	 * <code>effectName</code>.
+	 * Gets the effect currently being displayed on the device.
 	 * 
 	 * @param effectName           the name of the effect
-	 * @return                     a new <code>Effect</code> object based on the effect
-	 *                             <code>effectName</code>
+	 * @return                     a new effect based on the current effect
 	 * @throws NanoleafException   If the access token is invalid, or the specified effect
 	 *                             does not exist on the device
 	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Effect getEffect(String effectName)
-			throws NanoleafException, IOException, InterruptedException {
+			throws NanoleafException, IOException {
 		String body = String.format("{\"write\": {\"command\": \"request\", \"animName\": \"%s\"}}", effectName);
 		return Effect.createFromJSON(put(getURL("effects"), body));
 	}
 	
+	/**
+	 * <p>Asynchronously gets the effect currently being displayed on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#NOT_FOUND} if the effect does not exist. If an
+	 * internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effectName   the name of the effect
+	 * @param callback     returns the effect
+	 */
 	public void getEffectAsync(String effectName, NanoleafCallback<Effect> callback) {
 		String body = String.format("{\"write\": {\"command\": \"request\", \"animName\": \"%s\"}}", effectName);
 		putAsync(getURL("effects"), body, (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
 				callback.onCompleted(status, null, device);
 			}
-			callback.onCompleted(status, Effect.fromJSON(data), device);
+			else {
+				callback.onCompleted(status, Effect.createFromJSON(data), device);
+			}
 		});
 	}
 	
 	/**
-	 * Gets an array of type <code>Effect</code> containing all of the effects
-	 * installed on the device.
+	 * Gets an array containing all of the effects installed on the device.
 	 * 
 	 * @return                     an array of the effects installed on the device
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Effect[] getAllEffects()
+	public List<Effect> getAllEffects()
 			throws NanoleafException, IOException {
 		JSONObject json = new JSONObject(writeEffect("{\"command\": \"requestAll\"}"));
 		JSONArray animations = json.getJSONArray("animations");
-		Effect[] effects = new Effect[animations.length()];
+		List<Effect> effects = new ArrayList<Effect>();
 		for (int i = 0; i < animations.length(); i++) {
-			effects[i] = Effect.createFromJSON(animations.getJSONObject(i));
+			effects.add(Effect.createFromJSON(animations.getJSONObject(i)));
 		}
 		return effects;
 	}
 	
-	public void getAllEffectsAsync(NanoleafCallback<Effect[]> callback) {
+	/**
+	 * <p>Asynchronously gets an array containing all of the effects installed on
+	 * the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param callback   returns the array of effects
+	 */
+	public void getAllEffectsAsync(NanoleafCallback<List<Effect>> callback) {
 		writeEffectAsync("{\"command\": \"requestAll\"}", (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
 				callback.onCompleted(status, null, device);
 			}
 			JSONObject json = new JSONObject(data);
 			JSONArray animations = json.getJSONArray("animations");
-			Effect[] effects = new Effect[animations.length()];
+			List<Effect> effects = new ArrayList<Effect>();
 			for (int i = 0; i < animations.length(); i++) {
-				effects[i] = Effect.createFromJSON(animations.getJSONObject(i));
+				effects.add(Effect.createFromJSON(animations.getJSONObject(i)));
 			}
 			callback.onCompleted(status, effects, device);
 		});
 	}
 	
 	/**
-	 * Uploads and installs the local effect <code>effect</code> to the device. If the
-	 * effect does not exist on the device it will be created. If the effect exists
-	 * it will be overwritten.
+	 * Uploads and installs an effect to the device. If the effect does not exist
+	 * on the device it will be created. If the effect exists it will be overwritten.
 	 * 
 	 * @param effect               the effect to be uploaded
 	 * @throws NanoleafException   If the access token is invalid, or the effect parameter
@@ -1401,6 +1518,21 @@ public abstract class NanoleafDevice {
 		writeEffect(effect.toJSON("add").toString());
 	}
 	
+	/**
+	 * <p>Asynchronously uploads and installs an effect to the device. If the effect does
+	 * not exist on the device it will be created. If the effect exists it will be
+	 * overwritten.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the effect is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effect     the effect to be uploaded
+	 * @param callback   called when the effect is added or when an error occurs
+	 */
 	public void addEffectAsync(Effect effect, NanoleafCallback<String> callback) {
 		writeEffectAsync(effect.toJSON("add").toString(), callback);
 	}
@@ -1418,6 +1550,19 @@ public abstract class NanoleafDevice {
 		writeEffect(String.format("{\"command\": \"delete\", \"animName\": \"%s\"}", effectName));
 	}
 	
+	/**
+	 * <p>Asynchronously deletes an effect from the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#NOT_FOUND} if the effect does not exist. If an
+	 * internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effectName   the name of the effect
+	 * @param callback     called when the effect is deleted or when an error occurs
+	 */
 	public void deleteEffectAsync(String effectName, NanoleafCallback<String> callback) {
 		writeEffectAsync(String.format("{\"command\": \"delete\", \"animName\": \"%s\"}", effectName), callback);
 	}
@@ -1438,6 +1583,20 @@ public abstract class NanoleafDevice {
 				effectName, newName));
 	}
 	
+	/**
+	 * <p>Asynchronously renames an effect on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#NOT_FOUND} if the effect does not exist. If an
+	 * internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effectName   the name of the effect
+	 * @param newName      the new name of the effect
+	 * @param callback     called when the effect name is changed or when an error occurs
+	 */
 	public void renameEffectAsync(String effectName, String newName, NanoleafCallback<String> callback) {
 		writeEffectAsync(String.format("{\"command\": \"rename\", \"animName\": \"%s\", \"newName\": \"%s\"}",
 				effectName, newName), callback);
@@ -1456,8 +1615,58 @@ public abstract class NanoleafDevice {
 		writeEffect(effect.toJSON("display").toString());
 	}
 	
+	/**
+	 * <p>Asynchronously displays an effect on the device without installing it.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the effect is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effect     the effect to be displayed
+	 * @param callback   called when the effect is displayed
+	 */
 	public void displayEffectAsync(Effect effect, NanoleafCallback<String> callback) {
 		writeEffectAsync(effect.toJSON("display").toString(), callback);
+	}
+	
+	/**
+	 * Displays an effect for a given duration on the device without installing it.
+	 * 
+	 * @param effect               the effect to be previewed
+	 * @param duration             the duration for the effect to be displayed
+	 * @throws NanoleafException   If the access token is invalid, or the effect
+	 *                             parameter is configured incorrectly
+	 * @throws IOException         If an HTTP exception occurs
+	 */
+	public void displayEffectFor(Effect effect, int duration)
+			throws NanoleafException, IOException {
+		JSONObject body = effect.toJSON("displayTemp");
+		body.put("duration", duration);
+		writeEffect(body.toString());
+	}
+	
+	/**
+	 * <p>Asynchronously displays an effect for a given duration on the device without
+	 * installing it.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the effect is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effect     the effect to be displayed
+	 * @param duration   the duration for the effect to be displayed
+	 * @param callback   called when the effect is displayed
+	 */
+	public void displayEffectForAsync(Effect effect, int duration, NanoleafCallback<String> callback) {
+		JSONObject body = effect.toJSON("displayTemp");
+		body.put("duration", duration);
+		writeEffectAsync(body.toString(), callback);
 	}
 	
 	/**
@@ -1474,6 +1683,21 @@ public abstract class NanoleafDevice {
 		writeEffect(String.format("{\"command\": \"displayTemp\", \"duration\": %d, \"animName\": \"%s\"}", duration, effectName));
 	}
 	
+	/**
+	 * <p>Asynchronously displays an effect on the device for a given duration without
+	 * installing it.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#NOT_FOUND} if the effect does not exist on the device.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param effectName   the name of the effect to be displayed
+	 * @param duration     the duration for the effect to be displayed
+	 * @param callback     called when the effect is displayed
+	 */
 	public void displayEffectForAsync(String effectName, int duration, NanoleafCallback<String> callback) {
 		writeEffectAsync(String.format("{\"command\": \"displayTemp\", \"duration\": %d, \"animName\": \"%s\"}", duration, effectName), callback);
 	}
@@ -1498,6 +1722,30 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Asynchronously sets the color of a single panel on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param panel            the target panel
+	 * @param red              the red RGB value
+	 * @param green            the green RGB value
+	 * @param blue             the blue RGB value
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel changes color or when
+	 *                         an error occurs
+	 */
+	public void setPanelColorAsync(Panel panel, int red, int green, int blue,
+			int transitionTime, NanoleafCallback<String> callback) {
+		setPanelColorAsync(panel.getId(), red, green, blue, transitionTime, callback);
+	}
+	
+	/**
 	 * Sets the color of a single panel on the device.
 	 * 
 	 * @param panel                the target panel
@@ -1517,6 +1765,30 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Asynchronously sets the color of a single panel on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param panel            the target panel
+	 * @param hexColor         the new hex color
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelColorAsync(Panel panel, String hexColor, int transitionTime,
+			NanoleafCallback<String> callback) {
+		java.awt.Color color = java.awt.Color.decode(hexColor);
+		setPanelColorAsync(panel, color.getRed(),
+				color.getGreen(), color.getBlue(), transitionTime, callback);
+	}
+	
+	/**
 	 * Sets the color of a single panel on the device.
 	 * 
 	 * @param panelId              the target panel id
@@ -1532,12 +1804,44 @@ public abstract class NanoleafDevice {
 	 */
 	public void setPanelColor(int panelId, int red, int green, int blue, int transitionTime)
 			throws NanoleafException, IOException {
-		CustomEffect custom = new CustomEffect();
-		custom.setVersion("1.0"); // ?
-		custom.setAnimationData("1 " + panelId + " 1 " +
-				red + " " + green + " " + blue + " 0 " + transitionTime);
-		custom.setLoopEnabled(false);
+		CustomEffect custom = createSinglePanelEffect(panelId, red, green, blue, transitionTime);
 		displayEffect(custom);
+	}
+	
+	/**
+	 * <p>Asynchronously sets the color of a single panel on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param panelId          the target panel id
+	 * @param red              the red RGB value
+	 * @param green            the green RGB value
+	 * @param blue             the blue RGB value
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelColorAsync(int panelId, int red, int green, int blue,
+			int transitionTime, NanoleafCallback<String> callback) {
+		CustomEffect custom = createSinglePanelEffect(panelId, red, green, blue, transitionTime);
+		displayEffectAsync(custom, callback);
+	}
+	
+	private CustomEffect createSinglePanelEffect(int panelId, int red, int green,
+			int blue, int transitionTime) {
+		CustomEffect custom = new CustomEffect();
+		custom.setVersion("2.0");
+		custom.setAnimationData(String.format("1 %d 1 %d %d %d 0 %d",
+				panelId, red, green, blue, transitionTime));
+		custom.setLoopEnabled(false);
+		custom.setPalette(new Palette());
+		return custom;
 	}
 	
 	/**
@@ -1551,10 +1855,34 @@ public abstract class NanoleafDevice {
 	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public void setPanelColor(int panelId, String hexColor, int transitionTime)
-			throws NanoleafException, IOException, InterruptedException {
+			throws NanoleafException, IOException {
 		java.awt.Color color = java.awt.Color.decode(hexColor);
 		setPanelColor(panelId, color.getRed(),
 				color.getGreen(), color.getBlue(), transitionTime);
+	}
+	
+	/**
+	 * <p>Asynchronously sets the color of a single panel on the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param panelId          the target panel id
+	 * @param hexColor         the new hex color
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelColorAsync(int panelId, String hexColor,
+			int transitionTime, NanoleafCallback<String> callback) {
+		java.awt.Color color = java.awt.Color.decode(hexColor);
+		setPanelColorAsync(panelId, color.getRed(), color.getGreen(), color.getBlue(),
+				transitionTime, callback);
 	}
 	
 	/**
@@ -1570,11 +1898,48 @@ public abstract class NanoleafDevice {
 	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public void fadeToColor(int red, int green, int blue, int duration)
-			throws NanoleafException, IOException, InterruptedException {
+			throws NanoleafException, IOException {
 		CustomEffect ef = new CustomEffect.Builder(NanoleafDevice.this)
 							.addFrameToAllPanels(new Frame(red, green, blue, duration))
 							.build(null, false);
 		displayEffect(ef);
+	}
+	
+	/**
+	 * <p>Asynchronously fades all of the panels to an RGB color over a period of time.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color/duration are invalid. If an internal API error occurs, it will instead
+	 * return {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param red        the red RGB value
+	 * @param green      the green RGB value
+	 * @param blue       the blue RGB value
+	 * @param duration   the fade time, in hertz (10Hz = 1sec)
+	 * @param callback   called when the fade starts or when an error occurs
+	 */
+	public void fadeToColorAsync(int red, int green, int blue, int duration, NanoleafCallback<String> callback) {
+		CustomEffect.Builder.createBuilderAsync(this, (status, builder, device) -> {
+			if (status != NanoleafCallback.SUCCESS) {
+				callback.onCompleted(status, null, device);
+			}
+			CustomEffect ef = null;
+			try {
+				ef = builder.addFrameToAllPanels(new Frame(red, green, blue, duration))
+							.build(null, false);
+				displayEffect(ef);
+				callback.onCompleted(NanoleafCallback.SUCCESS, "", device);
+			}
+			catch (NanoleafException e) {
+				callback.onCompleted(e.getCode(), null, device);
+			}
+			catch (Exception e) {
+				callback.onCompleted(NanoleafCallback.FAILURE, null, device);
+			}
+		});
 	}
 	
 	/**
@@ -1587,9 +1952,60 @@ public abstract class NanoleafDevice {
 	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public void fadeToColor(String hexColor, int duration)
-			throws NanoleafException, IOException, InterruptedException {
+			throws NanoleafException, IOException {
 		java.awt.Color color = java.awt.Color.decode(hexColor);
 		fadeToColor(color.getRed(), color.getGreen(), color.getBlue(), duration);
+	}
+	
+	/**
+	 * <p>Asynchronously fades all of the panels to a hex color over a period of time.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color/duration are invalid. If an internal API error occurs, it will instead
+	 * return {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param hexColor   the new hex color
+	 * @param duration   the fade time <i>in hertz (frames per second)</i>
+	 * @param callback   called when the fade begins or when an error occurs
+	 */
+	public void fadeToColorAsync(String hexColor, int duration, NanoleafCallback<String> callback) {
+		java.awt.Color color = java.awt.Color.decode(hexColor);
+		fadeToColorAsync(color.getRed(), color.getGreen(), color.getBlue(), duration, callback);
+	}
+	
+	/**
+	 * Fades all of the panels to a hex color over a period of time.
+	 * 
+	 * @param color                the new color
+	 * @param duration             the fade time <i>in hertz (frames per second)</i>
+	 * @throws NanoleafException   If the access token is invalid, or the hex color is
+	 *                             invalid, or the duration is negative
+	 * @throws IOException         If an HTTP exception occurs
+	 */
+	public void fadeToColor(Color color, int duration)
+			throws NanoleafException, IOException {
+		fadeToColor(color.getRed(), color.getGreen(), color.getBlue(), duration);
+	}
+	
+	/**
+	 * <p>Asynchronously fades all of the panels to a hex color over a period of time.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the color/duration are invalid. If an internal API error occurs, it will instead
+	 * return {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param color      the new color
+	 * @param duration   the fade time <i>in hertz (frames per second)</i>
+	 * @param callback   called when the fade begins or when an error occurs
+	 */
+	public void fadeToColorAsync(Color color, int duration, NanoleafCallback<String> callback) {
+		fadeToColorAsync(color.getRed(), color.getGreen(), color.getBlue(), duration, callback);
 	}
 	
 	/**
@@ -1597,11 +2013,11 @@ public abstract class NanoleafDevice {
 	 * 
 	 * <p><b>Note:</b> This method is slow.</p>
 	 * 
-	 * @return  an array of plugins from the device
+	 * @return                     an array of plugins from the device
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Plugin[] getPlugins()
+	public List<PluginMeta> getPlugins()
 			throws NanoleafException, IOException {
 		String body = String.format("{\"write\": {\"command\": \"requestPlugins\"}}");
 		JSONObject json = new JSONObject(put(getURL("effects"), body));
@@ -1609,18 +2025,32 @@ public abstract class NanoleafDevice {
 		return jsonToPlugins(arr);
 	}
 	
-	public void getPluginsAsync(NanoleafCallback<Plugin[]> callback) {
+	/**
+	 * <p>Asynchronously gets all the plugins/motions from the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the array of plugins
+	 */
+	public void getPluginsAsync(NanoleafCallback<List<PluginMeta>> callback) {
 		String body = String.format("{\"write\": {\"command\": \"requestPlugins\"}}");
 		putAsync(getURL("effects"), body, (status, data, device) -> {
-			JSONArray json = new JSONArray(data);
-			callback.onCompleted(status, jsonToPlugins(json), device);
+			if (status != NanoleafCallback.SUCCESS) {
+				callback.onCompleted(status, null, device);
+				return;
+			}
+			JSONObject json = new JSONObject(data);
+			JSONArray arr = json.getJSONArray("plugins");
+			callback.onCompleted(status, jsonToPlugins(arr), device);
 		});
 	}
 	
-	private Plugin[] jsonToPlugins(JSONArray json) {
-		Plugin[] plugins = new Plugin[json.length()];
+	private List<PluginMeta> jsonToPlugins(JSONArray json) {
+		List<PluginMeta> plugins = new ArrayList<PluginMeta>();
 		for (int i = 0; i < json.length(); i++) {
-			plugins[i] = Plugin.fromJSON(json.getJSONObject(i));
+			plugins.add(PluginMeta.fromJSON(json.getJSONObject(i)));
 		}
 		return plugins;
 	}
@@ -1658,6 +2088,38 @@ public abstract class NanoleafDevice {
 		return put(getURL("effects"), body);
 	}
 	
+	/**
+	 * <p><b>(This method works with JSON data)</b></p>
+	 * 
+	 * <p>Asynchronously uploads a JSON string to the device. Calls the write effect
+	 * command from the <a href = "https://forum.nanoleaf.me/docs#_u2t4jzmkp8nt">OpenAPI</a>.
+	 * Refer to it for more information about the commands.</p>
+	 * 
+	 * <h1>Commands:</h1>
+	 * <ul>
+	 *   <li><i>add</i>          -  Installs an effect on the device or updates the effect
+	 *                              if it already exists.</li>
+	 *   <li><i>delete</i>       -  Permanently removes an effect from the device.</li>
+	 *   <li><i>request</i>      -  Requests a single effect by name.</li>
+	 *   <li><i>requestAll</i>   -  Requests all the installed effects from the device.</li>
+	 *   <li><i>display</i>      -  Sets a color mode on the device (used for previewing
+	 *                              effects).</li>
+	 *   <li><i>displayTemp</i>  -  Temporarily sets a color mode on the device (typically
+	 *                              used for notifications of visual indicators).</li>
+	 *   <li><i>rename</i>       -  Changes the name of an effect on the device.</li>
+	 * </ul>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid, or
+	 * {@link NanoleafCallback#UNPROCESSABLE_ENTITY}/{@link NanoleafCallback#BAD_REQUEST}
+	 * if the effect is invalid. If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param command               the operation to perform the write with
+	 * @param callback              called when the write request completes or when
+	 *                              an error occurs
+	 */
 	public void writeEffectAsync(String command, NanoleafCallback<String> callback) {
 		String body = String.format("{\"write\": %s}", command);
 		putAsync(getURL("effects"), body, callback);
@@ -1675,28 +2137,43 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Panel[] getPanels()
+	public List<Panel> getPanels()
 			throws NanoleafException, IOException {
 		return parsePanelsJSON(get(getURL("panelLayout/layout")));
 	}
 	
-	public void getPanelsAsync(NanoleafCallback<Panel[]> callback) {
+	/**
+	 * <p>Gets an array of the connected panels.</p>
+	 * 
+	 * <p>This is the ORIGINAL location data.
+	 * Since the original location data is not affected by the global orientation,
+	 * this data may not accurately represent the panels if displayed as is. For rotated
+	 * panel data, use the {@link NanoleafDevice#getPanelsRotated} method instead.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the array of panels
+	 */
+	public void getPanelsAsync(NanoleafCallback<List<Panel>> callback) {
 		getAsync(getURL("panelLayout/layout"), (status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
 				callback.onCompleted(status, null, device);
 			}
-			Panel[] panels = parsePanelsJSON(data);
+			List<Panel> panels = parsePanelsJSON(data);
 			callback.onCompleted(status, panels, device);
 		});
 	}
 	
-	private Panel[] parsePanelsJSON(String jsonStr) {
+	private List<Panel> parsePanelsJSON(String jsonStr) {
 		if (jsonStr == null) {
 			return null;
 		}
 		JSONObject json = new JSONObject(jsonStr);
 		JSONArray arr = json.getJSONArray("positionData");
-		Panel[] pd = new Panel[arr.length()];
+		List<Panel> pd = new ArrayList<Panel>();
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject data = arr.getJSONObject(i);
 			int panelId = data.getInt("panelId");
@@ -1704,7 +2181,7 @@ public abstract class NanoleafDevice {
 			int y = data.getInt("y");
 			int o = data.getInt("o");
 			ShapeType s = new ShapeType(data.getInt("shapeType"));
-			pd[i] = new Panel(panelId, x, y, o, s);
+			pd.add(new Panel(panelId, x, y, o, s));
 		}
 		return pd;
 	}
@@ -1717,9 +2194,9 @@ public abstract class NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Panel[] getPanelsRotated()
+	public List<Panel> getPanelsRotated()
 			throws NanoleafException, IOException {
-		Panel[] panels = getPanels();
+		List<Panel> panels = getPanels();
 		Point origin = getLayoutCentroid(panels);
 		int globalOrientation = getGlobalOrientation();
 		globalOrientation = globalOrientation == 360 ? 0 : globalOrientation;
@@ -1740,7 +2217,8 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
-	 * Finds a <code>Panel</code> object if you have a panel ID but not the panel object.
+	 * Gets a panel by its panel ID.
+	 * 
 	 * @param id                   the panel id for the panel
 	 * @return                     a panel with the same id, or null if no panel is found
 	 * @throws NanoleafException   If the access token is invalid
@@ -1751,6 +2229,17 @@ public abstract class NanoleafDevice {
 		return getPanel(id, getPanels());
 	}
 	
+	/**
+	 * <p>Asynchronously gets a panel by its panel ID.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param id         the panel id for the panel
+	 * @param callback   returns the panel
+	 */
 	public void getPanelAsync(int id, NanoleafCallback<Panel> callback) {
 		getPanelsAsync((status, data, device) -> {
 			if (status != NanoleafCallback.SUCCESS) {
@@ -1761,7 +2250,7 @@ public abstract class NanoleafDevice {
 		});
 	}
 	
-	private Panel getPanel(int id, Panel[] panels) {
+	private Panel getPanel(int id, List<Panel> panels) {
 		for (Panel panel : panels) {
 			if (panel.getId() == id) {
 				return panel;
@@ -1772,6 +2261,7 @@ public abstract class NanoleafDevice {
 	
 	/**
 	 * Gets the global orientation for the device.
+	 * 
 	 * @return                     the global orientation
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
@@ -1781,6 +2271,16 @@ public abstract class NanoleafDevice {
 		return Integer.parseInt(get(getURL("panelLayout/globalOrientation/value")));
 	}
 	
+	/**
+	 * <p>Asynchronously gets the global orientation for the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the global orientation
+	 */
 	public void getGlobalOrientationAsync(NanoleafCallback<Integer> callback) {
 		getAsyncInt(getURL("panelLayout/globalOrientation/value"), callback);
 	}
@@ -1798,7 +2298,19 @@ public abstract class NanoleafDevice {
 		put(getURL("panelLayout"), body);
 	}
 	
-	public void setGlobalOrientation(int orientation, NanoleafCallback<String> callback) {
+	/**
+	 * <p>Asynchronously sets the global orientation for the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param orientation   the global orientation
+	 * @param callback      called when the global orientation is set or when
+	 *                      an error occurs
+	 */
+	public void setGlobalOrientationAsync(int orientation, NanoleafCallback<String> callback) {
 		String body = String.format("{\"globalOrientation\": {\"value\": %d}}", orientation);
 		putAsync(getURL("panelLayout"), body, callback);
 	}
@@ -1815,12 +2327,23 @@ public abstract class NanoleafDevice {
 		return Integer.parseInt(get(getURL("panelLayout/globalOrientation/max")));
 	}
 	
+	/**
+	 * <p>Asynchronously gets the maximum global orientation for the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   returns the maximum global orientation
+	 */
 	public void getMaxGlobalOrientationAsync(NanoleafCallback<Integer> callback) {
 		getAsyncInt(getURL("panelLayout/globalOrientation/max"), callback);
 	}
 	
 	/**
 	 * Gets the minimum global orientation for the device.
+	 * 
 	 * @return                     the minimum global orientation
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
@@ -1830,11 +2353,21 @@ public abstract class NanoleafDevice {
 		return Integer.parseInt(get(getURL("panelLayout/globalOrientation/min")));
 	}
 	
+	/**
+	 * <p>Gets the minimum global orientation for the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   return the minimum global orientation
+	 */
 	public void getMinGlobalOrientationAsync(NanoleafCallback<Integer> callback) {
 		getAsyncInt(getURL("panelLayout/globalOrientation/min"), callback);
 	}
 	
-	private Point getLayoutCentroid(Panel[] panels) {
+	private Point getLayoutCentroid(List<Panel> panels) {
 		int centroidX = 0, centroidY = 0;
 		int numXPoints = 0, numYPoints = 0;
 		List<Integer> xpoints = new ArrayList<Integer>();
@@ -1879,35 +2412,63 @@ public abstract class NanoleafDevice {
 			throws NanoleafException, IOException {
 		String body = "{\"write\": {\"command\": \"display\", \"animType\": \"extControl\", \"extControlVersion\": \"v2\"}}";
 		put(getURL("effects"), body);
-		externalAddress = new InetSocketAddress(hostname, port);
+		externalAddress = new InetSocketAddress(hostname, EXTERNAL_STREAMING_PORT);
 	}
 	
-	public void enableExternalStreamingAsync(NanoleafCallback<String> callback)
-			throws NanoleafException, IOException {
+	/**
+	 * <p>Asynchronously enables external streaming mode over UDP.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param callback   called when external streaming is enabled or when
+	 *                   an error occurs
+	 */
+	public void enableExternalStreamingAsync(NanoleafCallback<String> callback) {
 		String body = "{\"write\": {\"command\": \"display\", \"animType\": \"extControl\", \"extControlVersion\": \"v2\"}}";
 		putAsync(getURL("effects"), body, (status, data, device) -> {
 			if (status == NanoleafCallback.SUCCESS) { 
-				externalAddress = new InetSocketAddress(hostname, port);
+				externalAddress = new InetSocketAddress(hostname, EXTERNAL_STREAMING_PORT);
 			}
 			callback.onCompleted(status, null, device);
 		});
 	}
 	
 	/**
-	 * <p>Sends a series of frames to the target device.</p>
+	 * <p>Sends a series of frames to the target Aurora.</p>
 	 * 
 	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
 	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
 	 * 
-	 * @param effect               the custom effect to be sent to the device
+	 * @param effect               the custom effect to be sent to the Aurora
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an I/O exception occurs
 	 * @throws SocketException     If the target device cannot be found or connected to
 	 */
-	public void sendStaticEffect(StaticEffect effect)
-			throws NanoleafException, IOException
-	{
-		sendAnimData(effect.getAnimationData());
+	public void sendStaticEffectExternalStreaming(StaticEffect effect)
+			throws NanoleafException, IOException {
+		sendAnimData(animDataToV2(effect.getAnimationData()));
+	}
+	
+	/**
+	 * <p>Asynchronously sends a series of frames to the target Aurora.</p>
+	 * 
+	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
+	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param effect     the custom effect to be sent to the Aurora
+	 * @param callback   called when the effect is sent or when an error occurs
+	 */
+	public void sendStaticEffectExternalStreamingAsync(StaticEffect effect,
+			NanoleafCallback<String> callback) {
+		sendAnimDataAsync(animDataToV2(effect.getAnimationData()), callback);
 	}
 	
 	/**
@@ -1942,6 +2503,32 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Sends a static animation data string to the target device.</p>
+	 * 
+	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
+	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param animData   the static animation data to be sent to the device
+	 * @param callback   called when the data is sent or when an error occurs
+	 */
+	public void sendAnimDataAsync(String animData, NanoleafCallback<String> callback) {
+		new Thread(() -> {
+			try {
+				sendAnimData(animData);
+				callback.onCompleted(NanoleafCallback.SUCCESS, null, NanoleafDevice.this);
+			}
+			catch (Exception e) {
+				callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
+			}
+		}).start();
+	}
+	
+	/**
 	 * Updates the color of a single panel.
 	 * 
 	 * @param panelId              the id of the panel to update
@@ -1954,12 +2541,38 @@ public abstract class NanoleafDevice {
 	 * @throws IOException         If an I/O exception occurs
 	 * @throws SocketException     If the target device cannot be found or connected to
 	 */
-	public void setPanelExternalStreaming(int panelId, int red, int green, int blue, int transitionTime)
-			throws NanoleafException, IOException {
+	public void setPanelExternalStreaming(int panelId, int red, int green,
+			int blue, int transitionTime)
+					throws NanoleafException, IOException {
 		String frame = String.format("%s %s %d %d %d 0 %s",
 				intToBigEndian(1), intToBigEndian(panelId), red, green,
 				blue, intToBigEndian(transitionTime));
 		sendAnimData(frame);
+	}
+	
+	/**
+	 * <p>Asynchronously updates the color of a single panel.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panelId          the id of the panel to update
+	 * @param red              the red RGB value
+	 * @param green            the green RGB value
+	 * @param blue             the blue RGB value
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(int panelId, int red, int green,
+			int blue, int transitionTime, NanoleafCallback<String> callback) {
+		String frame = String.format("%s %s %d %d %d 0 %s",
+				intToBigEndian(1), intToBigEndian(panelId), red, green,
+				blue, intToBigEndian(transitionTime));
+		sendAnimDataAsync(frame, callback);
 	}
 	
 	/**
@@ -1981,6 +2594,28 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Updates the color of a single panel using external streaming.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panel            the panel to update
+	 * @param red              the red RGB value
+	 * @param green            the green RGB value
+	 * @param blue             the blue RGB value
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(Panel panel, int red, int green, int blue,
+			int transitionTime, NanoleafCallback<String> callback) {
+		setPanelExternalStreamingAsync(panel.getId(), red, green, blue, transitionTime, callback);
+	}
+	
+	/**
 	 * Updates the color of a single panel using external streaming.
 	 * 
 	 * @param panelId              the id of the panel to update
@@ -1998,6 +2633,27 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Updates the color of a single panel using external streaming.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panelId          the id of the panel to update
+	 * @param color            the color object
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(int panelId, Color color,
+			int transitionTime, NanoleafCallback<String> callback) {
+		setPanelExternalStreamingAsync(panelId, color.getRed(),
+				color.getGreen(), color.getBlue(), transitionTime, callback);
+	}
+	
+	/**
 	 * Updates the color of a single panel using external streaming.
 	 * 
 	 * @param panel                the panel to update
@@ -2012,6 +2668,27 @@ public abstract class NanoleafDevice {
 			throws NanoleafException, IOException {
 		setPanelExternalStreaming(panel.getId(), color.getRed(),
 				color.getGreen(), color.getBlue(), transitionTime);
+	}
+	
+	/**
+	 * <p>Updates the color of a single panel using external streaming.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panel            the panel to update
+	 * @param color            the color object
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(Panel panel, Color color,
+			int transitionTime, NanoleafCallback<String> callback) {
+		setPanelExternalStreamingAsync(panel.getId(), color.getRed(),
+				color.getGreen(), color.getBlue(), transitionTime, callback);
 	}
 	
 	/**
@@ -2033,6 +2710,28 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * <p>Updates the color of a single panel using external streaming.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panelId          the id of the panel to update
+	 * @param hexColor         the hex color code
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(int panelId, String hexColor,
+			int transitionTime, NanoleafCallback<String> callback) {
+		java.awt.Color color = java.awt.Color.decode(hexColor);
+		setPanelExternalStreamingAsync(panelId, color.getRed(),
+				color.getGreen(), color.getBlue(), transitionTime, callback);
+	}
+	
+	/**
 	 * Updates the color of a single panel using external streaming.
 	 * 
 	 * @param panel                the panel to update
@@ -2050,6 +2749,28 @@ public abstract class NanoleafDevice {
 				color.getGreen(), color.getBlue(), transitionTime);
 	}
 	
+	/**
+	 * <p>Updates the color of a single panel using external streaming.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
+	 * If an internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}.</p>
+	 * 
+	 * @param panel            the panel to update
+	 * @param hexColor         the hex color code
+	 * @param transitionTime   the time to transition to this frame from
+	 * 						   the previous frame (must be 1 or greater)
+	 * @param callback         called when the panel color changes or when
+	 *                         an error occurs
+	 */
+	public void setPanelExternalStreamingAsync(Panel panel, String hexColor,
+			int transitionTime, NanoleafCallback<String> callback) {
+		java.awt.Color color = java.awt.Color.decode(hexColor);
+		setPanelExternalStreamingAsync(panel.getId(), color.getRed(),
+				color.getGreen(), color.getBlue(), transitionTime, callback);
+	}
+	
 	private byte[] animDataToBytes(String animData) {
 		String[] dataStr = animData.split(" ");
 		byte[] dataBytes = new byte[dataStr.length];
@@ -2058,174 +2779,192 @@ public abstract class NanoleafDevice {
 		return dataBytes;
 	}
 	
-	private static String intToBigEndian(int num) {
+	private String intToBigEndian(int num) {
 		final int BYTE_SIZE = 256;
 		int times = Math.floorDiv(num, BYTE_SIZE);
 		return String.format("%s %s", times, num-(BYTE_SIZE*times));
 	}
 	
-	public ServerSentEvent registerTouchEventListener(NanoleafEventListener listener,
-			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
-		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
-		Request req = new Request.Builder()
-				.url(url)
-				.get()
-				.build();
-		OkSse okSse = new OkSse(client);
-		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
-		sse.add(s);
-		return s;
+	// Changes the two-byte fields of an animation data string into big endian
+	// so that it can be used for external streaming
+	private String animDataToV2(String animData) {
+		String[] fields = animData.split(" ");
+		StringBuilder data = new StringBuilder();
+		int numPanels = Integer.parseInt(fields[0]);
+		data.append(intToBigEndian(numPanels));
+		for (int i = 0; i < numPanels; i++) {
+			String panelid = intToBigEndian(Integer.parseInt(fields[i*7+1]));
+			int r = Integer.parseInt(fields[i*7+3]);
+			int g = Integer.parseInt(fields[i*7+4]);
+			int b = Integer.parseInt(fields[i*7+5]);
+			String transition = intToBigEndian(Integer.parseInt(fields[i*7+7]));
+			data.append(String.format(" %s %d %d %d 0 %s", panelid, r, g, b, transition));
+		}
+		return data.toString();
 	}
 	
-	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
-		StringBuilder query = new StringBuilder("?id=");
-		if (stateEvents) {
-			query.append("1");
-		}
-		if (layoutEvents) {
-			if (query.length() > 0) {
-				query.append(",");
-			}
-			query.append("2");
-		}
-		if (effectsEvents) {
-			if (query.length() > 0) {
-				query.append(",");
-			}
-			query.append("3");
-		}
-		if (effectsEvents) {
-			if (query.length() > 0) {
-				query.append(",");
-			}
-			query.append("4");
-		}
-		return query.toString();
-	}
+//	public ServerSentEvent registerTouchEventListener(NanoleafEventListener listener,
+//			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+//		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
+//		Request req = new Request.Builder()
+//				.url(url)
+//				.get()
+//				.build();
+//		OkSse okSse = new OkSse(client);
+//		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
+//		sse.add(s);
+//		return s;
+//	}
+//	
+//	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+//		StringBuilder query = new StringBuilder("?id=");
+//		if (stateEvents) {
+//			query.append("1");
+//		}
+//		if (layoutEvents) {
+//			if (query.length() > 0) {
+//				query.append(",");
+//			}
+//			query.append("2");
+//		}
+//		if (effectsEvents) {
+//			if (query.length() > 0) {
+//				query.append(",");
+//			}
+//			query.append("3");
+//		}
+//		if (effectsEvents) {
+//			if (query.length() > 0) {
+//				query.append(",");
+//			}
+//			query.append("4");
+//		}
+//		return query.toString();
+//	}
 	
-	/**
-	 * Gets an array of schedules stored on the device.
-	 * 
-	 * @return  an array of schedules
-	 */
-	public Schedule[] getSchedules()
-			throws NanoleafException, IOException {
-		JSONObject obj = new JSONObject(get(getURL("schedules")));
-		JSONArray arr = obj.getJSONArray("schedules");
-		Schedule[] schedules = new Schedule[arr.length()];
-		for (int i = 0; i < arr.length(); i++) {
-			schedules[i] = Schedule.fromJSON(
-					arr.getJSONObject(i).toString());
-		}
-		return schedules;
-	}
-	
-	/**
-	 * Uploads an array of schedules to the device.
-	 * 
-	 * @param schedules            an array of schedules
-	 * @throws NanoleafException   If the access token is invalid, or one or more
-	 *                             given schedules are configured incorrectly
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void addSchedules(Schedule[] schedules)
-			throws NanoleafException, IOException {
-		String schedulesStr = "\"schedules\":[";
-		for (int i = 0; i < schedules.length; i++) {
-			schedulesStr += schedules[i];
-			if (i < schedules.length-1) {
-				schedulesStr += ",";
-			}
-			else {
-				schedulesStr += "]";
-			}
-		}
-		String body = String.format("{\"write\":{\"command\":" +
-				"\"addSchedules\",%s}}", schedulesStr);
-		put(getURL("effects"), body);
-	}
-	
-	/**
-	 * Uploads a schedule to the device.
-	 * 
-	 * @param schedule             the schedule to upload
-	 * @throws NanoleafException   If the access token is invalid, or one or more
-	 *                             given schedules are configured incorrectly
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void addSchedule(Schedule schedule)
-			throws NanoleafException, IOException {
-		addSchedules(new Schedule[]{schedule});
-	}
-	
-	/**
-	 * Deletes an array of schedules from the device.
-	 * 
-	 * @param schedules            an array of schedules be deleted
-	 * @throws NanoleafException   If the access token is invalid, or one or more
-	 *                             given schedules do not exist on the device
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void removeSchedules(Schedule[] schedules)
-			throws NanoleafException, IOException {
-		int[] ids = new int[schedules.length];
-		for (int i = 0; i < schedules.length; i++) {
-			ids[i] = schedules[i].getId();
-		}
-		removeSchedulesById(ids);
-	}
-	
-	/**
-	 * Deletes a schedule from the device.
-	 * 
-	 * @param schedule             the schedule to delete
-	 * @throws NanoleafException   If the access token is invalid, or the given
-	 *                             schedule does not exist on the device
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void removeSchedule(Schedule schedule)
-			throws NanoleafException, IOException {
-		removeSchedules(new Schedule[]{schedule});
-	}
-	
-	/**
-	 * Deletes an array of schedules from the device using their unique schedule IDs.
-	 * 
-	 * @param scheduleIds          an array of schedule IDs to be delete
-	 * @throws NanoleafException   If the access token is invalid, or the device
-	 *                             does not contain one or more of the schedule IDs
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void removeSchedulesById(int[] scheduleIds)
-			throws NanoleafException, IOException {
-		String schedulesStr = "\"schedules\":[";
-		for (int i = 0; i < scheduleIds.length; i++) {
-			schedulesStr += String.format("{\"id\":%d}",
-					scheduleIds[i]);
-			if (i < scheduleIds.length-1) {
-				schedulesStr += ",";
-			}
-			else {
-				schedulesStr += "]";
-			}
-		}
-		String body = String.format("{\"write\":{\"command\":" +
-				"\"removeSchedules\",%s}}", schedulesStr);
-		put(getURL("effects"), body);
-	}
-	
-	/**
-	 * Deletes a schedule from the device using its unique schedule ID.
-	 * 
-	 * @param scheduleId           the schedule ID of the schedule to be deleted
-	 * @throws NanoleafException   If the access token is invalid, or the device
-	 *                             does not contain the schedule ID
-	 * @throws IOException         If an HTTP exception occurs
-	 */
-	public void removeScheduleById(int scheduleId)
-			throws NanoleafException, IOException {
-		removeSchedulesById(new int[]{scheduleId});
-	}
+//	/**
+//	 * Gets an array of schedules stored on the device.
+//	 * 
+//	 * @return  an array of schedules
+//	 */
+//	public Schedule[] getSchedules()
+//			throws NanoleafException, IOException {
+//		JSONObject obj = new JSONObject(get(getURL("schedules")));
+//		JSONArray arr = obj.getJSONArray("schedules");
+//		Schedule[] schedules = new Schedule[arr.length()];
+//		for (int i = 0; i < arr.length(); i++) {
+//			schedules[i] = Schedule.fromJSON(
+//					arr.getJSONObject(i).toString());
+//		}
+//		return schedules;
+//	}
+//	
+//	/**
+//	 * Uploads an array of schedules to the device.
+//	 * 
+//	 * @param schedules            an array of schedules
+//	 * @throws NanoleafException   If the access token is invalid, or one or more
+//	 *                             given schedules are configured incorrectly
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void addSchedules(Schedule[] schedules)
+//			throws NanoleafException, IOException {
+//		String schedulesStr = "\"schedules\":[";
+//		for (int i = 0; i < schedules.length; i++) {
+//			schedulesStr += schedules[i];
+//			if (i < schedules.length-1) {
+//				schedulesStr += ",";
+//			}
+//			else {
+//				schedulesStr += "]";
+//			}
+//		}
+//		String body = String.format("{\"write\":{\"command\":" +
+//				"\"addSchedules\",%s}}", schedulesStr);
+//		put(getURL("effects"), body);
+//	}
+//	
+//	/**
+//	 * Uploads a schedule to the device.
+//	 * 
+//	 * @param schedule             the schedule to upload
+//	 * @throws NanoleafException   If the access token is invalid, or one or more
+//	 *                             given schedules are configured incorrectly
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void addSchedule(Schedule schedule)
+//			throws NanoleafException, IOException {
+//		addSchedules(new Schedule[]{schedule});
+//	}
+//	
+//	/**
+//	 * Deletes an array of schedules from the device.
+//	 * 
+//	 * @param schedules            an array of schedules be deleted
+//	 * @throws NanoleafException   If the access token is invalid, or one or more
+//	 *                             given schedules do not exist on the device
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void removeSchedules(Schedule[] schedules)
+//			throws NanoleafException, IOException {
+//		int[] ids = new int[schedules.length];
+//		for (int i = 0; i < schedules.length; i++) {
+//			ids[i] = schedules[i].getId();
+//		}
+//		removeSchedulesById(ids);
+//	}
+//	
+//	/**
+//	 * Deletes a schedule from the device.
+//	 * 
+//	 * @param schedule             the schedule to delete
+//	 * @throws NanoleafException   If the access token is invalid, or the given
+//	 *                             schedule does not exist on the device
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void removeSchedule(Schedule schedule)
+//			throws NanoleafException, IOException {
+//		removeSchedules(new Schedule[]{schedule});
+//	}
+//	
+//	/**
+//	 * Deletes an array of schedules from the device using their unique schedule IDs.
+//	 * 
+//	 * @param scheduleIds          an array of schedule IDs to be delete
+//	 * @throws NanoleafException   If the access token is invalid, or the device
+//	 *                             does not contain one or more of the schedule IDs
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void removeSchedulesById(int[] scheduleIds)
+//			throws NanoleafException, IOException {
+//		String schedulesStr = "\"schedules\":[";
+//		for (int i = 0; i < scheduleIds.length; i++) {
+//			schedulesStr += String.format("{\"id\":%d}",
+//					scheduleIds[i]);
+//			if (i < scheduleIds.length-1) {
+//				schedulesStr += ",";
+//			}
+//			else {
+//				schedulesStr += "]";
+//			}
+//		}
+//		String body = String.format("{\"write\":{\"command\":" +
+//				"\"removeSchedules\",%s}}", schedulesStr);
+//		put(getURL("effects"), body);
+//	}
+//	
+//	/**
+//	 * Deletes a schedule from the device using its unique schedule ID.
+//	 * 
+//	 * @param scheduleId           the schedule ID of the schedule to be deleted
+//	 * @throws NanoleafException   If the access token is invalid, or the device
+//	 *                             does not contain the schedule ID
+//	 * @throws IOException         If an HTTP exception occurs
+//	 */
+//	public void removeScheduleById(int scheduleId)
+//			throws NanoleafException, IOException {
+//		removeSchedulesById(new int[]{scheduleId});
+//	}
 	
 	/**
 	 * Constructs a full URL to make an API call.
@@ -2348,6 +3087,7 @@ public abstract class NanoleafDevice {
 						code = NanoleafCallback.SUCCESS;
 					}
 					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
+					
 				}
 			}
 		});

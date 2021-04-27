@@ -76,7 +76,7 @@ public class StaticEffect extends CustomEffect {
 	 */
 	public static class Builder {
 		
-		private Panel[] panels;
+		private List<Panel> panels;
 		private Map<Integer, Frame> frames;
 		
 		/**
@@ -97,7 +97,7 @@ public class StaticEffect extends CustomEffect {
 		 * 
 		 * @param panels  the panel data
 		 */
-		public Builder(Panel[] panels) {
+		public Builder(List<Panel> panels) {
 			this.panels = panels;
 			frames = new HashMap<Integer, Frame>();
 		}
@@ -113,7 +113,7 @@ public class StaticEffect extends CustomEffect {
 		 * @param device     the target device that the effect will be displayed on
 		 * @param callback   the callback to receive the builder
 		 */
-		public void createBuilderAsync(NanoleafDevice device, NanoleafCallback<Builder> callback) {
+		public static void createBuilderAsync(NanoleafDevice device, NanoleafCallback<Builder> callback) {
 			device.getPanelsAsync((status, data, deviceCaller) -> {
 				if (status != NanoleafCallback.SUCCESS) {
 					callback.onCompleted(NanoleafCallback.FAILURE, null, deviceCaller);
@@ -146,9 +146,9 @@ public class StaticEffect extends CustomEffect {
 			StringBuilder data = new StringBuilder();
 			data.append(frames.size());
 			List<Integer> ids = new ArrayList<Integer>(frames.keySet());
-			for (int i = 0; i < panels.length; i++) {
-				if (ids.contains(panels[i].getId())) {
-					Panel panel = panels[i];
+			for (int i = 0; i < panels.size(); i++) {
+				if (ids.contains(panels.get(i).getId())) {
+					Panel panel = panels.get(i);
 					Frame frame = frames.get(panel.getId());
 					data.append(" " + panel.getId() + " 1");
 					data.append(" " +

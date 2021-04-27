@@ -14,12 +14,12 @@ public class Shapes extends NanoleafDevice {
 
 	/**
 	 * Creates a new instance of the Shapes controller.
-	 * @param hostname  the hostname of the controller
-	 * @param port  the port of the controller (default=16021)
-	 * @param accessToken  a unique authentication token
-	 * @throws NanoleafException  if the access token is invalid
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * 
+	 * @param hostname             the hostname of the controller
+	 * @param port                 the port of the controller (default=16021)
+	 * @param accessToken          a unique authentication token
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Shapes(String hostname, int port, String accessToken)
 			throws NanoleafException, IOException {
@@ -29,11 +29,11 @@ public class Shapes extends NanoleafDevice {
 	
 	/**
 	 * Creates a new instance of the Shapes controller.
-	 * @param hostname  the hostname of the controller
-	 * @param accessToken  a unique authentication token
-	 * @throws NanoleafException  if the access token is invalid
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * 
+	 * @param hostname             the hostname of the controller
+	 * @param accessToken          a unique authentication token
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
 	 */
 	public Shapes(String hostname, String accessToken)
 			throws NanoleafException, IOException {
@@ -51,7 +51,8 @@ public class Shapes extends NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Shapes(String hostname, int port, String accessToken, NanoleafCallback<Shapes> callback) {
+	public Shapes(String hostname, int port, String accessToken,
+			NanoleafCallback<Shapes> callback) {
 		super(hostname, port, accessToken, callback);
 	}
 	
@@ -65,7 +66,8 @@ public class Shapes extends NanoleafDevice {
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an HTTP exception occurs
 	 */
-	public Shapes(String hostname, String accessToken, NanoleafCallback<Shapes> callback) {
+	public Shapes(String hostname, String accessToken,
+			NanoleafCallback<Shapes> callback) {
 		super(hostname, DEFAULT_PORT, accessToken, callback);
 	}
 	
