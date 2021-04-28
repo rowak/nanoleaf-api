@@ -1,6 +1,9 @@
 # Binary files
 target
 
+# Development
+deploy.sh
+
 # Test files
 .testauth
 test.java
