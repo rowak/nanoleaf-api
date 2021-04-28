@@ -8,12 +8,20 @@ This library is the successor to my old Aurora Java library. It has a significan
 - Effects class redesigned for Effect v2
 - Many broken features have been fixed
 
-## Documentation (not yet ready)
+## [Documentation](https://rawcdn.githack.com/rowak/nanoleaf-api/f25288cf7b862efc4238342eb5011c8c045eeca0/doc/index.html)
 
 ## Installation
-### Maven (not yet ready)
+### Maven
+```xml
+<dependency>
+  <groupId>io.github.rowak</groupId>
+  <artifactId>nanoleaf-api</artifactId>
+  <version>0.0.1</version>
+</dependency>
+```
 
-### Manual (not yet ready)
+### Manual
+You can download the [compiled jar](https://repo1.maven.org/maven2/io/github/rowak/nanoleaf-api/) and import it into your project.
 
 ## Connecting to a Device
 First, search for all of the existing Nanoleaf devices connected to your local network, then select one from the returned list. You can also do this asynchronously.
