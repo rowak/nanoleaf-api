@@ -28,15 +28,16 @@ First, search for all of the existing Nanoleaf devices connected to your local n
 
 ```Java
 int timeout = 2000;
-List<NanoleafDeviceMeta> devices = NanoleafSetup.findDevices(timeout);
+List<NanoleafDeviceMeta> devices = NanoleafSetup.findNanoleafDevices(timeout);
 ```
 
-Next create an access token to authenticate with the device. You must first physically hold down the power button on your device for 5-7 seconds until the LED starts flashing before running the following code. Make sure to write down your access token for future use, however you can create as many as you like.
+Next create an access token to authenticate with the chosen device. You must first physically hold down the power button on your device for 5-7 seconds until the LED starts flashing before running the following code. Make sure to write down your access token for future use, however you can create as many as you like.
 ```Java
-String accessToken = NanoleafSetup.createAccessToken()
+NanoleafMeta meta = ...
+String accessToken = NanoleafSetup.createAccessToken(meta.getHostName(), meta.getPort());
 ```
 
-Finally, you can connect to a device using the following code. Select any device from the devices list to connect to.
+Finally, you can connect to a device using the following code.
 ```Java
 NanoleafDeviceMeta meta = ...
 NanoleafDevice device = NanoleafSetup.createDevice(meta, accessToken);
@@ -105,7 +106,7 @@ device.setEffect(effectName);
 device.addEffect(effect);
 device.deleteEffect(effectName);
 device.renameEffect(effectName, newName);
-device.previewEffect(effect);
+device.displayEffect(effect);
 ```
 
 The following example creates a new plugin effect from scratch using the "wheel" plugin:
