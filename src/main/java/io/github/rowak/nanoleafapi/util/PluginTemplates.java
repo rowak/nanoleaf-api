@@ -62,7 +62,7 @@ public class PluginTemplates {
 	 * Creates a plugin template for the Explode legacy plugin. This plugin is
 	 * similar to the Flow plugin, but the colors move out from the center of
 	 * the panel system, rather than the edge.
-	 * @return
+	 * @return   an explode plugin template
 	 */
 	public static Plugin getExplodeTemplate() {
 		Map<String, Object> options = new HashMap<String, Object>();

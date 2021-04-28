@@ -1302,18 +1302,14 @@ public class NanoleafGroup {
 	}
 	
 	/**
-	 * <p>Asynchronously sends a series of frames to the target device.</p>
+	 * <p>Sends a static animation data string to the target device.</p>
 	 * 
 	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
 	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
-	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
-	 * If an internal API error occurs, it will instead return
-	 * {@link NanoleafCallback#FAILURE}.</p>
-	 * 
-	 * @param effect     the custom effect to be sent to the device
-	 * @param callback   called when the effect is sent or when an error occurs
+	 * @param animData   the static animation data to be sent to the device
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an I/O exception occurs
 	 */
 	public void sendAnimData(String animData)
 			throws NanoleafException, IOException {
@@ -1323,7 +1319,7 @@ public class NanoleafGroup {
 	}
 	
 	/**
-	 * <p>Sends a static animation data string to the target device.</p>
+	 * <p>Asynchronously sends a static animation data string to the target device.</p>
 	 * 
 	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
 	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>

@@ -161,10 +161,10 @@ public class CustomEffect extends Effect {
 		/**
 		 * <p>Asynchronously creates a new custom effect builder.</p>
 		 * 
-		 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-		 * or {@link NanoleafCallback.UNAUTHORIZED} if the access token is invalid. If an
+		 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+		 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
 		 * internal API error occurs, it will instead return
-		 * {@link NanoleafCallback.FAILURE}.</p>
+		 * {@link NanoleafCallback#FAILURE}.</p>
 		 * 
 		 * @param device     the target device that the effect will be displayed on
 		 * @param callback   the callback to receive the builder

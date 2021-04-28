@@ -56,8 +56,8 @@ public class NanoleafSetup {
 	 * <p><b>Note:</b> If the timeout is set too low, not all of the devices may be found
 	 * in time. A few seconds should usually be enough time.</p>
 	 * 
-	 * <p>The callback status will return {@link NanoleafCallback.SUCCESS} on success,
-	 * or {@link NanoleafCallback.FAILURE} if an error occurs.</p>
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#FAILURE} if an error occurs.</p>
 	 * 
 	 * @throws UnknownHostException  if the host's local address cannot be found
 	 * @throws IOException           unknown IO exception
