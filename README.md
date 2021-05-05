@@ -182,7 +182,7 @@ ef.getPlugin().putOption("transTime", 25);
 device.addEffect(ef);
 ```
 
-Note that not all plugins use the same plugin options. There are some basic ones that are mostly supported by all plugins such as "transTime" (which is short for "transition time"), but some plugins have special plugin options. You can experiment with this or refer to the official Nanoleaf API documentation for more details (however it is still somewhat lacking).
+Note that not all plugins use the same plugin options. There are some basic ones that are mostly supported by all plugins such as "transTime" (which is short for "transition time"), but some plugins have special plugin options. You can experiment with this or refer to the official [Nanoleaf API documentation](https://forum.nanoleaf.me/docs#_qnaqwxdrcgiv) for more details (however it is still somewhat lacking).
 
 Alternatively, plugins can also be created from scratch. The following example creates a new plugin effect from scratch using the "wheel" plugin:
 ```Java
