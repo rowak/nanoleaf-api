@@ -10,6 +10,33 @@ This library is the successor to my old Aurora Java library. It has a significan
 
 ## [Documentation](https://rawcdn.githack.com/rowak/nanoleaf-api/f25288cf7b862efc4238342eb5011c8c045eeca0/doc/index.html)
 
+
+## Table of Contents
+1. **[Installation](#installation)**
+    1. **[Maven](#maven)**
+    2. **[Manual](#manual)**
+2. **[Connecting to a Device](#connecting-to-a-device)**
+3. **[Controlling a Device](#controlling-a-device)**
+    1. **[State](#state)**
+        1. **[On/Off](#onoff)**
+        2. **[Brightness](#brightness)**
+        3. **[Hue](#hue)**
+        4. **[Saturation](#saturation)**
+        5. **[Color Temperature](#color-temperature)**
+    2. **[Effects](#effects)**
+    3. **[Panel Layout](#panel-layout)**
+    4. **[Rhythm (Aurora Only)](#rhythm-aurora-only)**
+    5. **[External Streaming](#external-streaming)**
+4. **[The Effect Class](#the-effect-class)**
+    1. **[Plugin Effects](#plugin-effects)**
+    2. **[Custom Effects](#custom-effects)**
+    3. **[Static Effects](#static-effects)**
+5. **Events (WIP)**
+6. **Schedules (WIP)**
+7. **[Asynchronous](#asynchronous)**
+8. **[Exceptions](#exceptions)**
+9. **[Used Libraries](#used-libraries)**
+
 ## Installation
 ### Maven
 ```xml
@@ -109,24 +136,6 @@ device.renameEffect(effectName, newName);
 device.displayEffect(effect);
 ```
 
-The following example creates a new plugin effect from scratch using the "wheel" plugin:
-```Java
-PluginEffect eff = new PluginEffect();
-Plugin p = PluginTemplates.getWheelTemplate(); // Plugin templates allow for easier effect creation
-p.putOption("transTime", 10);                  // Change the default transition time to 10
-eff.setPlugin(p);
-eff.setName("My Animation");
-eff.setVersion("2.0");                         // Effect v2.0 is the latest version
-eff.setEffectType("plugin");
-eff.setColorType("HSB");
-eff.setPalette(new Palette.Builder()
-				.addColor(Color.RED)
-				.addColor(Color.GREEN)
-				.addColor(Color.BLUE)
-				.build());
-device.addEffect(eff);
-```
-
 ### Panel Layout
 Information about the arrangement of a Nanoleaf device's panels can be retrieved. Below are a few examples.
 ```Java
@@ -151,15 +160,47 @@ External streaming is a useful feature that allows for fast and continuous updat
 The following example initializes external streaming mode, then sets a few panels to purple.
 ```Java
 List<Panel> panels = device.getPanels();
-device.enableExternalStreaming();                               // enable external streaming
+device.enableExternalStreaming();                                   // enable external streaming
 for (int i = 0; i < 4; i++)
     device.setPanelExternalStreaming(panels.get(i), "#FF00FF", 1);  // set a few panels to purple
 ```
 
 You can also send much more complicated static and animated effects very quickly using external streaming.
 
+Note that the Nanoleaf Shapes devices seem to have a limit on how fast they can stream. It seems that about 50ms between requests is the limit. The Aurora does *not* seem to have this limitation.
+
 ## The Effect Class
 There are three types of effects: plugins, static, and custom. Plugins (also called motions) are effects written using the Nanoleaf SDK (C++) that define how effects should be rendered. Most effects are of this type. Static effects are motionless effects that can be used for displaying a still image or setting the color of all the panels. Custom effects are frame-by-frame animations that are very customizable.
+
+### Plugin Effects
+Plugin effects are the most common type of effect. Plugins (or motions) define how the effect is rendered, and the effect contains additional information that can change the appearance of the plugin a bit. The basic behavior of the plugin itself cannot be changed.
+
+Plugin effects can be retrieved from a device, modified, and then re-uploaded to the device to change the effect appearance. The following example will set the transition time of the effect called "My effect" (assumed to be already installed on the device) to 25, which is pretty fast.
+```Java
+PluginEffect ef = (PluginEffect)device.getEffect("My effect");
+ef.getPlugin().putOption("transTime", 25);
+device.addEffect(ef);
+```
+
+Note that not all plugins use the same plugin options. There are some basic ones that are mostly supported by all plugins such as "transTime" (which is short for "transition time"), but some plugins have special plugin options. You can experiment with this or refer to the official Nanoleaf API documentation for more details (however it is still somewhat lacking).
+
+Alternatively, plugins can also be created from scratch. The following example creates a new plugin effect from scratch using the "wheel" plugin:
+```Java
+PluginEffect eff = new PluginEffect();
+Plugin p = PluginTemplates.getWheelTemplate(); // Plugin templates make effect creation easier
+p.putOption("transTime", 10);                  // Change the default transition time to 10
+eff.setPlugin(p);
+eff.setName("My Animation");
+eff.setVersion("2.0");                         // Effect v2.0 is the latest version
+eff.setEffectType("plugin");
+eff.setColorType("HSB");
+eff.setPalette(new Palette.Builder()
+                .addColor(Color.RED)
+                .addColor(Color.GREEN)
+                .addColor(Color.BLUE)
+                .build());
+device.addEffect(eff);
+```
 
 ### Custom Effects
 Custom effects allow you to create highly customizable animations. A custom effect is made up of a sequence of frames defined for each panel, where each frame has a color and a set time that it takes to transition to that color.
@@ -169,12 +210,12 @@ The following example creates a custom effect that cycles through a few colors o
 ```Java
 CustomEffect ef = new CustomEffect.Builder(device)
                     .addFrameToAllPanels(new Frame(Color.RED, 3))
-				    .addFrameToAllPanels(new Frame(Color.ORANGE, 10))
-				    .addFrameToAllPanels(new Frame(Color.YELLOW, 5))
-				    .addFrameToAllPanels(new Frame(Color.GREEN, 7))
-				    .addFrameToAllPanels(new Frame(Color.BLUE, 3))
-				    .addFrameToAllPanels(new Frame(Color.MAGENTA, 11))
-				    .build("My Animation", true);  // build an animation called "My Animation" that loops
+                    .addFrameToAllPanels(new Frame(Color.ORANGE, 10))
+                    .addFrameToAllPanels(new Frame(Color.YELLOW, 5))
+                    .addFrameToAllPanels(new Frame(Color.GREEN, 7))
+                    .addFrameToAllPanels(new Frame(Color.BLUE, 3))
+                    .addFrameToAllPanels(new Frame(Color.MAGENTA, 11))
+                    .build("My Animation", true);  // build an animation called "My Animation" that loops
 device.displayEffect(ef);
 ```
 
@@ -217,3 +258,8 @@ This exception will be thrown if an HTTP error code is returned from the Nanolea
 - 422 (Unprocessable entity)  --  Thrown if the Nanoleaf device rejects the arguments you provided for a method 
 
 Note that exceptions should not be thrown when using the asynchronous methods. These methods use status codes for error reporting.
+
+## Used Libraries
+- [JSON-Java](https://github.com/stleary/JSON-java)
+- [OkHttp](https://github.com/square/okhttp)
+- [OkSSE](https://github.com/heremaps/oksse)
