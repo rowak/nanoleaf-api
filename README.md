@@ -31,7 +31,8 @@ This library is the successor to my old Aurora Java library. It has a significan
     1. **[Plugin Effects](#plugin-effects)**
     2. **[Custom Effects](#custom-effects)**
     3. **[Static Effects](#static-effects)**
-5. **Events (WIP)**
+5. **[Events](#events)**
+    1. **[Low-Latency Touch Events](#low-latency-touch-events)**
 6. **Schedules (WIP)**
 7. **[Asynchronous](#asynchronous)**
 8. **[Exceptions](#exceptions)**
@@ -222,8 +223,52 @@ device.displayEffect(ef);
 ### Static Effects
 Static effects are a subset of custom effects; they are created very similarly but they can only have one frame per panel. Static effects are created using the StaticEffect.Builder class.
 
-## Events (WIP)
-Events have not yet been fully implemented.
+## Events
+Event listeners can be created to listen for changes to the state of Nanoleaf devices. You can choose to listen for all, or only specific classes of events. A listener for listening to all classes of events is created as follows:
+```Java
+device.registerEventListener(new NanoleafEventListener() {
+    @Override
+    public void onOpen() {
+        // Called when the listener is created
+    }
+
+    @Override
+    public void onClosed() {
+        // Called when the listener is closed
+    }
+
+    @Override
+    public void onEvent(Event[] events) {
+        // Called when an event occurs (~1-2 second delay)
+    }
+}, true, true, true, true);
+```
+
+An array of events is returned for multiple events that happen at the same time. When you no longer need the event listeners, you can unregister then with the `closeEventListeners()` method on any Nanoleaf device.
+
+### Low-Latency Touch Events
+If you need lower latency when working with touch events, you can register a low-latency touch event listener for near-realtime touch events over UDP. The information returned from a low-latency event is more detailed and a bit lower-level than normal events. A low-latency touch event listener is created as follows:
+```Java
+device.enableTouchEventStreaming(some_port_number); // You need to specify a port to listen on
+device.registerTouchEventStreamingListener(new NanoleafTouchEventListener() {
+    @Override
+    public void onOpen() {
+        // Called when the listener is created
+    }
+
+    @Override
+    public void onClosed() {
+        // Called when the listener is closed
+    }
+
+    @Override
+    public void onEvent(DetailedTouchEvent[] events) {
+        // Called when a touch event occurs
+    }
+});
+```
+
+When you no longer need the event listeners, you can unregister them with the `closeTouchEventListeners()` method on any Nanoleaf device.
 
 ## Schedules (WIP)
 Schedules have not yet been fully implemented. In fact, they are completely broken on the latest firmware.
