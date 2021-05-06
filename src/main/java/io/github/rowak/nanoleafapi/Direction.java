@@ -6,6 +6,6 @@ package io.github.rowak.nanoleafapi;
 public enum Direction {
 	
 	LEFT, RIGHT, UP, DOWN,
-	/** Radiate out from the center */
+	/** Move from the center to the edges*/
 	OUTWARDS
 }

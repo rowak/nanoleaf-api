@@ -3,6 +3,7 @@ target
 
 # Development
 deploy.sh
+javadoc.sh
 
 # Test files
 .testauth
