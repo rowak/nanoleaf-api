@@ -44,7 +44,7 @@ This library is the successor to my old Aurora Java library. It has a significan
 <dependency>
   <groupId>io.github.rowak</groupId>
   <artifactId>nanoleaf-api</artifactId>
-  <version>0.0.1</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
