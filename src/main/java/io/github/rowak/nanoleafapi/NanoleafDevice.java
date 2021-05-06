@@ -6,7 +6,10 @@ import org.json.JSONObject;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
 
+import io.github.rowak.nanoleafapi.event.Event;
 import io.github.rowak.nanoleafapi.event.NanoleafEventListener;
+import io.github.rowak.nanoleafapi.event.NanoleafTouchEventListener;
+import io.github.rowak.nanoleafapi.event.UDPTouchEventListener;
 import io.github.rowak.nanoleafapi.schedule.Schedule;
 import io.github.rowak.nanoleafapi.util.HttpUtil;
 import okhttp3.Call;
@@ -46,9 +49,13 @@ public abstract class NanoleafDevice {
 	
 	/** Internal SSE clients record (for resource cleanup) */
 	private List<ServerSentEvent> sse;
+	private UDPTouchEventListener touchEventListener;
+	private Thread touchEventThread;
 	
 	private String hostname, accessToken;
 	private int port;
+	
+	private int touchEventStreamingPort = -1;
 	
 	/** This information is very unlikely to change, so it is cached */
 	private String name;
@@ -231,12 +238,22 @@ public abstract class NanoleafDevice {
 	
 	/**
 	 * Closes all event listeners that have been opened with
-	 * {@link NanoleafDevice#registerTouchEventListener}.
+	 * {@link NanoleafDevice#registerEventListener(NanoleafEventListener,
+	 * boolean, boolean, boolean, boolean)}.
 	 */
-	public void closeEventListener() {
+	public void closeEventListeners() {
 		for (ServerSentEvent s : sse) {
 			s.close();
 		}
+	}
+	
+	/**
+	 * Closes all low latency touch event (streaming) listeners that
+	 * have been opened with {@link NanoleafDevice#registerTouchEventStreamingListener(NanoleafTouchEventListener)}
+	 */
+	public void closeTouchEventListeners() {
+		touchEventListener.close();
+		touchEventListener = null;
 	}
 	
 	/**
@@ -2477,6 +2494,11 @@ public abstract class NanoleafDevice {
 	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
 	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
 	 * 
+	 * <p><b>Also Note:</b> It seems that the Nanoleaf Shapes devices have a
+	 * limit on how fast they can stream. It seems that about 50ms between
+	 * requests is the limit. The Aurora does *not* seem to have this limitation
+	 * even on the latest firmware.</p>
+	 * 
 	 * @param animData             the static animation data to be sent to the device
 	 * @throws NanoleafException   If the access token is invalid
 	 * @throws IOException         If an I/O exception occurs
@@ -2508,6 +2530,11 @@ public abstract class NanoleafDevice {
 	 * <p><b>Note:</b>Requires external streaming to be enabled. Enable it
 	 * using the {@link NanoleafDevice#enableExternalStreaming} method.</p>
 	 * 
+	 * <p><b>Also Note:</b> It seems that the Nanoleaf Shapes devices have a
+	 * limit on how fast they can stream. It seems that about 50ms between
+	 * requests is the limit. The Aurora does *not* seem to have this limitation
+	 * even on the latest firmware.</p>
+	 * 
 	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
 	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid.
 	 * If an internal API error occurs, it will instead return
@@ -2520,10 +2547,14 @@ public abstract class NanoleafDevice {
 		new Thread(() -> {
 			try {
 				sendAnimData(animData);
-				callback.onCompleted(NanoleafCallback.SUCCESS, null, NanoleafDevice.this);
+				if (callback != null) {
+					callback.onCompleted(NanoleafCallback.SUCCESS, null, NanoleafDevice.this);
+				}
 			}
 			catch (Exception e) {
-				callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
+				if (callback != null) {
+					callback.onCompleted(NanoleafCallback.FAILURE, null, NanoleafDevice.this);
+				}
 			}
 		}).start();
 	}
@@ -2803,44 +2834,102 @@ public abstract class NanoleafDevice {
 		return data.toString();
 	}
 	
-//	public ServerSentEvent registerTouchEventListener(NanoleafEventListener listener,
-//			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
-//		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
-//		Request req = new Request.Builder()
-//				.url(url)
-//				.get()
-//				.build();
-//		OkSse okSse = new OkSse(client);
-//		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
-//		sse.add(s);
-//		return s;
-//	}
-//	
-//	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
-//		StringBuilder query = new StringBuilder("?id=");
-//		if (stateEvents) {
-//			query.append("1");
-//		}
-//		if (layoutEvents) {
-//			if (query.length() > 0) {
-//				query.append(",");
-//			}
-//			query.append("2");
-//		}
-//		if (effectsEvents) {
-//			if (query.length() > 0) {
-//				query.append(",");
-//			}
-//			query.append("3");
-//		}
-//		if (effectsEvents) {
-//			if (query.length() > 0) {
-//				query.append(",");
-//			}
-//			query.append("4");
-//		}
-//		return query.toString();
-//	}
+	/**
+	 * <p>Registers an event listener for one or more types of events.</p>
+	 * 
+	 * <p><b>Note:</b> the touch events produced by this listener have a very high
+	 * latency of about 1 to 2 seconds. For very low latency touch events, you
+	 * can instead use the {@link NanoleafDevice#registerTouchEventStreamingListener(NanoleafTouchEventListener)}
+	 * method for near-realtime latency.</p>
+	 * 
+	 * @param listener        a listener to listen for events
+	 * @param stateEvents     listens for changes to the state of the device
+	 * @param layoutEvents    listens for changes to the layout of the device panels
+	 * @param effectsEvents   listens for changes to the device effects or selected effect
+	 * @param touchEvents     listens for touch events such as "tap", "double-tap", and "swipe"
+	 * @return                an SSE object
+	 */
+	public ServerSentEvent registerEventListener(NanoleafEventListener listener,
+			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
+		Request req = new Request.Builder()
+				.url(url)
+				.get()
+				.build();
+		OkSse okSse = new OkSse(client);
+		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
+		sse.add(s);
+		return s;
+	}
+	
+	/**
+	 * Enables touch event streaming on a specific port. This allows for very
+	 * low latency and detailed touch events. This method should only be
+	 * called once.
+	 * 
+	 * @param port               the port to listen for events on
+	 * @throws SocketException   If a socket exception occurs
+	 */
+	public void enableTouchEventStreaming(int port) throws SocketException {
+		if (touchEventListener == null) {
+			touchEventListener = new UDPTouchEventListener(port);
+			touchEventThread = new Thread(touchEventListener);
+			touchEventThread.start();
+			touchEventStreamingPort = port;
+		}
+	}
+	
+	/**
+	 * <p>Registers an event listener for very low latency and detailed touch events.</p>
+	 * 
+	 * <p><b>Note:</b> the method {@link NanoleafDevice#enableTouchEventStreaming(int)}
+	 * MUST be called before any touch event listeners are registered.</p>
+	 * 
+	 * @param listener
+	 */
+	public void registerTouchEventStreamingListener(NanoleafTouchEventListener listener) {
+		String url = getURL("events?id=4");
+		Request req = new Request.Builder()
+				.url(url)
+				.addHeader("TouchEventsPort", touchEventStreamingPort + "")
+				.get()
+				.build();
+		OkSse okSse = new OkSse(client);
+		ServerSentEvent s = okSse.newServerSentEvent(req, new NanoleafEventListener() {
+			// Dummy listener
+			public void onOpen(){}
+			public void onClosed(){}
+			public void onEvent(Event[] events){}
+		});
+		sse.add(s);
+		touchEventListener.addListener(listener);
+	}
+	
+	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		StringBuilder query = new StringBuilder("?id=");
+		if (stateEvents) {
+			query.append("1");
+		}
+		if (layoutEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("2");
+		}
+		if (effectsEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("3");
+		}
+		if (effectsEvents) {
+			if (query.length() > 0) {
+				query.append(",");
+			}
+			query.append("4");
+		}
+		return query.toString();
+	}
 	
 //	/**
 //	 * Gets an array of schedules stored on the device.
@@ -3039,7 +3128,7 @@ public abstract class NanoleafDevice {
 			public void onResponse(Call call, Response response) throws IOException {
 				if (callback != null) {
 					int code = response.code();
-					if (code == 200 || code == 204) {
+					if (code == NanoleafCallback.OK || code == NanoleafCallback.NO_CONTENT) {
 						code = NanoleafCallback.SUCCESS;
 					}
 					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
@@ -3061,7 +3150,7 @@ public abstract class NanoleafDevice {
 			public void onResponse(Call call, Response response) throws IOException {
 				if (callback != null) {
 					int code = response.code();
-					if (code == 200 || code == 204) {
+					if (code == NanoleafCallback.OK || code == NanoleafCallback.NO_CONTENT) {
 						code = NanoleafCallback.SUCCESS;
 					}
 					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
@@ -3083,13 +3172,28 @@ public abstract class NanoleafDevice {
 			public void onResponse(Call call, Response response) throws IOException {
 				if (callback != null) {
 					int code = response.code();
-					if (code == 200 || code == 204) {
+					if (code == NanoleafCallback.OK || code == NanoleafCallback.NO_CONTENT) {
 						code = NanoleafCallback.SUCCESS;
 					}
 					callback.onCompleted(code, response.body().string(), NanoleafDevice.this);
-					
 				}
 			}
 		});
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s (%s:%d)", name, hostname, port);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		NanoleafDevice other = (NanoleafDevice)obj;
+		return this.hostname.equals(other.hostname) && this.port == other.port &&
+				this.name.equals(other.name) && this.serialNumber.equals(other.serialNumber) &&
+				this.manufacturer.equals(other.manufacturer) && this.model.equals(other.model);
 	}
 }

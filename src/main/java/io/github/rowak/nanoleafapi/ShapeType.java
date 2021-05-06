@@ -106,4 +106,29 @@ public class ShapeType {
 			default: return 0;
 		}
 	}
+	
+	@Override
+	public String toString() {
+		switch (shape) {
+			case TRIANGLE_AURORA: return "TRIANGLE_AURORA";
+			case RHYTHM: return "RHYTHM";
+			case SQUARE: return "SQUARE";
+			case SQUARE_MASTER: return "SQUARE_MASTER";
+			case SQUARE_PASSIVE: return "SQUARE_PASSIVE";
+			case HEXAGON: return "HEXAGON";
+			case TRIANGLE_SHAPES: return "TRIANGLE_SHAPES";
+			case MINI_TRIANGLE: return "MINI_TRIANGLE";
+			case SHAPES_CONTROLLER: return "SHAPES_CONTROLLER";
+			default: return null;
+		}
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		ShapeType other = (ShapeType)obj;
+		return this.shape == other.shape;
+	}
 }

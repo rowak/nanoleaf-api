@@ -10,4 +10,9 @@ public interface QueryCallback {
 	 * @param instance  the instance that was received
 	 */
 	public void onInstance(Instance instance);
+	
+	/**
+	 * Signals that the search has timed out.
+	 */
+	public void onTimeout();
 }

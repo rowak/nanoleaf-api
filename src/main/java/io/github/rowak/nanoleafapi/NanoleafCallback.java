@@ -44,8 +44,9 @@ public interface NanoleafCallback<T> {
 	public static final int INTERNAL_SERVER_ERROR = HttpUtil.INTERNAL_SERVER_ERROR;
 	
 	/**
-	 * Signals that an asynchronous request has completed.
-	 * Possible status response codes include:
+	 * <p>Signals that an asynchronous request has completed.</p>
+	 * 
+	 * <p>Possible status response codes include:
 	 * <ul>
 	 * <li>{@link NanoleafCallback#SUCCESS}</li>
 	 * <li>{@link NanoleafCallback#FAILURE}</li>
@@ -58,6 +59,7 @@ public interface NanoleafCallback<T> {
 	 * <li>{@link NanoleafCallback#UNPROCESSABLE_ENTITY}</li>
 	 * <li>{@link NanoleafCallback#INTERNAL_SERVER_ERROR}</li>
 	 * </ul>
+	 * </p>
 	 * 
 	 * @param status   the response status (see above status codes)
 	 * @param data     the response data; only set when the status code is SUCCESS (1),

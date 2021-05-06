@@ -36,7 +36,6 @@ public interface NanoleafEventListener extends ServerSentEvent.Listener {
 
 	@Override
 	public default void onMessage(ServerSentEvent sse, String id, String event, String message) {
-		System.out.println(id + " " + event + " " + message);
 		int idNum = Integer.parseInt(id);
 		EventType eventType = EventType.values()[idNum-1];
 		JSONObject messageJson = new JSONObject(message);

@@ -55,6 +55,7 @@ public class NanoleafDeviceMeta {
 	
 	/**
 	 * Gets the name of the associated Nanoleaf device.
+	 * 
 	 * @return  the name of the device
 	 */
 	public String getHostName() {
@@ -62,7 +63,8 @@ public class NanoleafDeviceMeta {
 	}
 	
 	/**
-	 * Sets the metadata host name of the associated Nanoleaf device.<br>
+	 * Sets the metadata host name of the associated Nanoleaf device.
+	 * 
 	 * @param hostName  the host name of the device
 	 */
 	public void setHostName(String hostName) {
@@ -132,5 +134,15 @@ public class NanoleafDeviceMeta {
 	@Override
 	public String toString() {
 		return String.format("%s:%d (%s)", hostName, port, deviceName);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		NanoleafDeviceMeta other = (NanoleafDeviceMeta)obj;
+		return this.hostName.equals(other.hostName) && this.port == other.port &&
+				this.deviceName.equals(other.deviceName);
 	}
 }

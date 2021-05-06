@@ -276,6 +276,9 @@ public class Query {
         listenerFinished = true;
         socketLock.unlock();
         buildInstancesFromRecords();
+        if (callback != null) {
+        	callback.onTimeout();
+        }
         return instances;
     }
 

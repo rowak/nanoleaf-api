@@ -3,6 +3,8 @@ package io.github.rowak.nanoleafapi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 /**
  * A storage class for panels from a Nanoleaf Device.
  */
@@ -125,6 +127,35 @@ public class Panel {
 	 */
 	public void setShape(ShapeType shape) {
 		this.shape = shape;
+	}
+	
+	public static Panel fromJSON(JSONObject json) {
+		try {
+			return new Panel(json.getInt("id"),
+							 json.getInt("x"),
+							 json.getInt("y"),
+							 json.getInt("o"),
+							 new ShapeType(json.getInt("shapeType")));
+		}
+		catch (Exception e) {
+			throw new JSONParserException("Invalid arguments");
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("[id=%d, x=%d, y=%d, o=%d, s=%s]",
+				id, x, y, orientation, shape);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		Panel other = (Panel)obj;
+		return this.id == other.id && this.x == other.x && this.y == other.y &&
+				this.orientation == other.orientation && this.shape.equals(other.shape);
 	}
 	
 //	/**

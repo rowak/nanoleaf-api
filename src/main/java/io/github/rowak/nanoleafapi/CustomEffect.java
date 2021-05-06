@@ -111,7 +111,6 @@ public class CustomEffect extends Effect {
 		effect.setName(baseEffect.getName());
 		effect.setEffectType(CUSTOM_ANIM_TYPE);
 		effect.setVersion(baseEffect.getVersion());
-		effect.setColorType(baseEffect.getColorType());
 		effect.setPalette(baseEffect.getPalette());
 		if (json.has("animData")) {
 			effect.setAnimationData(json.getString("animData"));
@@ -120,6 +119,21 @@ public class CustomEffect extends Effect {
 			effect.setLoopEnabled(json.getBoolean("loop"));
 		}
 		return effect;
+	}
+	
+	@Override
+	public String toString() {
+		return toJSON().toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		CustomEffect other = (CustomEffect)obj;
+		return super.equals(obj) && this.animData.equals(other.animData) &&
+				this.loop == other.loop;
 	}
 	
 	/**

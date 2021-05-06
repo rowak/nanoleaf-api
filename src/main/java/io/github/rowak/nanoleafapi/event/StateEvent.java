@@ -5,6 +5,10 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+/**
+ * Listens for changes to the state of the Nanoleaf device, such as changes
+ * in brightness.
+ */
 public class StateEvent extends Event {
 	
 	/** Event attribute that is sent when the device is turned on or off.
@@ -36,14 +40,54 @@ public class StateEvent extends Event {
 	}
 	
 	public static StateEvent fromJSON(JSONObject json) {
-		int attribute = json.getInt("attr");
-		Object value = json.get("value");
+		int attribute = UNKNOWN_ATTRIBUTE;
+		Object value = null;
+		if (json.has("attr")) {
+			attribute = json.getInt("attr");
+		}
+		if (json.has("value")) {
+			value = json.get("value");
+		}
 		return new StateEvent(attribute, value);
 	}
+	
+	/**
+	 * <p>Gets the attribute of the event.</p>
+	 * 
+	 * <p>This will return one of the following:
+	 * <ul>
+	 * <li>{@link StateEvent#ON_ATTRIBUTE}</li>
+	 * <li>{@link StateEvent#BRIGHTNESS_ATTRIBUTE}</li>
+	 * <li>{@link StateEvent#HUE_ATTRIBUTE}</li>
+	 * <li>{@link StateEvent#SATURATION_ATTRIBUTE}</li>
+	 * <li>{@link StateEvent#CCT_ATTRIBUTE}</li>
+	 * <li>{@link StateEvent#COLORMODE_ATTRIBUTE}</li>
+	 * </ul></p>
+	 * 
+	 * @return   the event attribute
+	 */
+	@Override
+	public int getAttribute() {
+		return super.getAttribute();
+	}
+	
 //	
 //	public JSONObject toJSON() {
 //		JSONObject json = new JSONObject();
 //		json.put("attr", getAttribute());
 //		json.put("value", getValue());
 //	}
+	
+	@Override
+	public String toString() {
+		switch (getAttribute()) {
+			case ON_ATTRIBUTE: return "ON: " + getValue();
+			case BRIGHTNESS_ATTRIBUTE: return "BRIGHTNESS: " + getValue();
+			case HUE_ATTRIBUTE: return "HUE: " + getValue();
+			case SATURATION_ATTRIBUTE: return "SATURATION: " + getValue();
+			case CCT_ATTRIBUTE: return "COLOR TEMP: " + getValue();
+			case COLORMODE_ATTRIBUTE: return "COLOR MODE: " + getValue();
+			default: return "UNKNOWN";
+		}
+	}
 }

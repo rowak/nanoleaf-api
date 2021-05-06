@@ -13,6 +13,7 @@ import io.github.rowak.nanoleafapi.NanoleafCallback;
 import io.github.rowak.nanoleafapi.NanoleafDevice;
 import io.github.rowak.nanoleafapi.NanoleafDeviceMeta;
 import io.github.rowak.nanoleafapi.NanoleafException;
+import io.github.rowak.nanoleafapi.NanoleafSearchCallback;
 import net.straylightlabs.hola.dns.Domain;
 import net.straylightlabs.hola.sd.Service;
 import okhttp3.OkHttpClient;
@@ -62,12 +63,21 @@ public class NanoleafSetup {
 	 * @throws UnknownHostException  if the host's local address cannot be found
 	 * @throws IOException           unknown IO exception
 	 */
-	public static void findNanoleafDevicesAsync(NanoleafCallback<NanoleafDeviceMeta> callback, int timeout)
-			throws UnknownHostException, IOException {
+	public static void findNanoleafDevicesAsync(NanoleafSearchCallback callback, int timeout)
+			throws UnknownHostException {
 		Service service = Service.fromName(NANOLEAF_MDNS_SERVICE);
         Query query = Query.createWithTimeout(service, Domain.LOCAL, timeout);
-        query.runAsync((instance) -> {
-        	callback.onCompleted(NanoleafCallback.SUCCESS, NanoleafDeviceMeta.fromMDNSInstance(instance), null);
+        query.runAsync(new QueryCallback() {
+        	
+        	@Override
+        	public void onInstance(Instance instance) {
+        		callback.onDeviceFound(NanoleafDeviceMeta.fromMDNSInstance(instance));
+        	}
+        	
+        	@Override
+        	public void onTimeout() {
+        		callback.onTimeout();
+        	}
         });
 	}
 	

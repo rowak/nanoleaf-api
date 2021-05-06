@@ -13,11 +13,21 @@ public class Effect {
 	 *  version that this library uses. Changing the version may break things. */
 	public static final String DEFAULT_VERSION = "2.0";
 	
+	/** As far as I know, the color type should always be HSB. */
+	public static final String DEFAULT_COLOR_TYPE = "HSB";
+	
 	private String name;
 	private String efType;
 	private String version;
 	private String colorType;
 	private Palette palette;
+	
+	/**
+	 * The effect direction types available for some effects (such as Wheel).
+	 */
+	public enum Direction {
+		LEFT, RIGHT, UP, DOWN, OUTWARDS
+	}
 	
 	/**
 	 * Gets the name of the effect.
@@ -78,23 +88,13 @@ public class Effect {
 	}
 	
 	/**
-	 * Gets the color type of the effect. This will either be
-	 * "HSB" or "RGB", although it will almost always be HSB.
+	 * Gets the color type for the effect. This will almost always
+	 * be set to "HSB" (hue-saturation-brightness).
 	 * 
 	 * @return   the effect color type
 	 */
 	public String getColorType() {
 		return colorType;
-	}
-	
-	/**
-	 * Sets the color type of the effect. Must be set to either
-	 * "HSB" or "RGB". This will almost always be set to HSB.
-	 * 
-	 * @param colorType   the effect color type
-	 */
-	public void setColorType(String colorType) {
-		this.colorType = colorType;
 	}
 	
 	/**
@@ -135,12 +135,25 @@ public class Effect {
 	 */
 	public JSONObject toJSON() {
 		JSONObject json = new JSONObject();
-		json.put("version", version);
+		if (version != null) {
+			json.put("version", version);
+		}
+		else {
+			json.put("version", DEFAULT_VERSION);
+		}
 		json.put("animName", name);
 		json.put("animType", efType);
-		json.put("colorType", colorType);
+		if (colorType != null) {
+			json.put("colorType", colorType);
+		}
+		else {
+			json.put("colorType", DEFAULT_COLOR_TYPE);
+		}
 		if (palette != null) {
 			json.put("palette", palette.toJSON());
+		}
+		else {
+			json.put("palette", new Palette().toJSON());
 		}
 		return json;
 	}
@@ -170,6 +183,9 @@ public class Effect {
 		}
 		if (json.has("colorType")) {
 			effect.colorType = json.getString("colorType");
+		}
+		else {
+			effect.colorType = DEFAULT_COLOR_TYPE;
 		}
 		if (json.has("palette")) {
 			try {
@@ -241,5 +257,16 @@ public class Effect {
 	@Override
 	public String toString() {
 		return toJSON().toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		Effect other = (Effect)obj;
+		return this.name.equals(other.name) && this.efType.equals(other.efType) &&
+				this.version.equals(other.version) && this.colorType.equals(other.colorType) &&
+				this.palette.equals(other.palette);
 	}
 }

@@ -58,7 +58,6 @@ public class PluginEffect extends Effect {
 		effect.setName(baseEffect.getName());
 		effect.setEffectType(baseEffect.getEffectType());
 		effect.setVersion(baseEffect.getVersion());
-		effect.setColorType(baseEffect.getColorType());
 		effect.setPalette(baseEffect.getPalette());
 		effect.setPlugin(Plugin.fromJSON(json));
 		return effect;

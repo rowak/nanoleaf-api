@@ -75,4 +75,15 @@ public class Shapes extends NanoleafDevice {
 			throws NanoleafException, IOException {
 		super(hostname, port, accessToken, client);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		Shapes other = (Shapes)obj;
+		return this.getHostname().equals(other.getHostname()) && this.getPort() == other.getPort() &&
+				this.getName().equals(other.getName()) && this.getSerialNumber().equals(other.getSerialNumber()) &&
+				this.getManufacturer().equals(other.getManufacturer()) && this.getModel().equals(other.getModel());
+	}
 }

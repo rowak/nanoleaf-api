@@ -102,6 +102,17 @@ public class NanoleafGroup {
 	}
 	
 	/**
+	 * Synchronously executes a shared action for each device in the group.
+	 * 
+	 * @param action   the shared action
+	 */
+	public void forEach(GroupAction action) {
+		for (NanoleafDevice d : devices.values()) {
+			action.run(d);
+		}
+	}
+	
+	/**
 	 * Force a shutdown of the internal HTTP client.
 	 * <b>Note:</b> This method only has effect if asynchronous calls have
 	 * been made. The HTTP client will eventually shut down on its own, but
@@ -116,7 +127,7 @@ public class NanoleafGroup {
 	 * Closes all event listeners.
 	 */
 	public void closeEventListeners() {
-		devices.forEach((n, d) -> d.closeEventListener());
+		devices.forEach((n, d) -> d.closeEventListeners());
 	}
 	
 	/**
@@ -607,6 +618,43 @@ public class NanoleafGroup {
 		setBrightness(color.getBrightness());
 	}
 	
+	public void setColorAsync(Color color, NanoleafCallback<String> callback) {
+		devices.forEach((n,d) -> {
+			setHueAsync(color.getHue(), (status, data, device) -> {
+				if (status != NanoleafCallback.SUCCESS && callback != null) {
+					callback.onCompleted(status, null, d);
+					return;
+				}
+				try {
+					setSaturation(color.getSaturation());
+					setBrightness(color.getBrightness());
+					if (callback != null) {
+						callback.onCompleted(NanoleafCallback.SUCCESS, "", device);
+					}
+				}
+				catch (NanoleafException e) {
+					if (callback != null) {
+						callback.onCompleted(e.getCode(), "", device);
+					}
+				}
+				catch (Exception e) {
+					if (callback != null) {
+						callback.onCompleted(NanoleafCallback.FAILURE, null, device);
+					}
+				}
+			});
+		});
+	}
+	
+	public List<String> getAllEffectsList()
+			throws NanoleafException, IOException {
+		List<String> effects = new ArrayList<String>();
+		for (NanoleafDevice d : devices.values()) {
+			effects.addAll(d.getEffectsList());
+		}
+		return effects;
+	}
+	
 	/**
 	 * Sets the selected effect on the devices to the effect specified by
 	 * <code>effectName</code>.
@@ -671,22 +719,15 @@ public class NanoleafGroup {
 		devices.forEach((n, d) -> d.setRandomEffectAsync(callback));
 	}
 	
-//	/**
-//	 * Gets an array of type <code>Effect</code> containing all of
-//	 * the effects installed on the Aurora controller.
-//	 * @return  an array of the effects installed on the Aurora controller
-//	 * @throws UnauthorizedException   if the access token is invalid
-//	 */
-//	public Effect[] getAllEffects()
-//			throws NanoleafException, IOException {
-//		JSONObject json = new JSONObject(writeEffect("{\"command\": \"requestAll\"}"));
-//		JSONArray animations = json.getJSONArray("animations");
-//		Effect[] effects = new Effect[animations.length()];
-//		for (int i = 0; i < animations.length(); i++) {
-//			effects[i] = Effect.createFromJSON(animations.getJSONObject(i));
-//		}
-//		return effects;
-//	}
+	
+	public List<Effect> getAllEffects()
+			throws NanoleafException, IOException {
+		List<Effect> effects = new ArrayList<Effect>();
+		for (NanoleafDevice d : devices.values()) {
+			effects.addAll(d.getAllEffects());
+		}
+		return effects;
+	}
 	
 	/**
 	 * Uploads and installs an effect to the devices. If the effect does not exist
@@ -1174,17 +1215,21 @@ public class NanoleafGroup {
 		devices.forEach((n, d) -> d.writeEffectAsync(command, callback));
 	}
 	
-//	/**
-//	 * Gets an array of the connected panels.
-//	 * Each <code>Panel</code> contains the <b>original position data.</b>
-//	 * @return  an array of panels
-//	 * @throws UnauthorizedException  if the access token is invalid
-//	 */
-//	public Panel[] getAllPanels()
-//			throws NanoleafException, IOException {
-//		return parsePanelsJSON(get(getURL("panelLayout/layout")));
-//	}
-//	
+	/**
+	 * Gets an array of the connected panels.
+	 * Each <code>Panel</code> contains the <b>original position data.</b>
+	 * @return  an array of panels
+	 * @throws UnauthorizedException  if the access token is invalid
+	 */
+	public List<Panel> getAllPanels()
+			throws NanoleafException, IOException {
+		List<Panel> panels = new ArrayList<Panel>();
+		for (NanoleafDevice d : devices.values()) {
+			panels.addAll(d.getPanels());
+		}
+		return panels;
+	}
+	
 //	public void getAllPanelsAsync(NanoleafCallback<Panel[]> callback) {
 //		getAsync(getURL("panelLayout/layout"), (status, data) -> {
 //			if (status != NanoleafCallback.SUCCESS) {
@@ -1195,34 +1240,21 @@ public class NanoleafGroup {
 //		});
 //	}
 	
-//	/**
-//	 * Gets an array of the connected panels that are
-//	 * rotated to match the global orientation.
-//	 * Each <code>Panel</code> contains <b>modified position data.</b>
-//	 * @return an array of rotated panels
-//	 * @throws UnauthorizedException  if the access token is invalid
-//	 */
-//	public Panel[] getAllPanelsRotated()
-//			throws NanoleafException, IOException {
-//		Panel[] panels = getPanels();
-//		Point origin = getLayoutCentroid(panels);
-//		int globalOrientation = getGlobalOrientation();
-//		globalOrientation = globalOrientation == 360 ? 0 : globalOrientation;
-//		double radAngle = Math.toRadians(globalOrientation);
-//		for (Panel p : panels) {
-//			int x = p.getX() - origin.x;
-//			int y = p.getY() - origin.y;
-//			
-//			double newX = x * Math.cos(radAngle) - y * Math.sin(radAngle);
-//			double newY = x * Math.sin(radAngle) + y * Math.cos(radAngle);
-//			
-//			x = (int)(newX + origin.x);
-//			y = (int)(newY + origin.y);
-//			p.setX(x);
-//			p.setY(y);
-//		}
-//		return panels;
-//	}
+	/**
+	 * Gets an array of the connected panels that are
+	 * rotated to match the global orientation.
+	 * Each <code>Panel</code> contains <b>modified position data.</b>
+	 * @return an array of rotated panels
+	 * @throws UnauthorizedException  if the access token is invalid
+	 */
+	public List<Panel> getAllPanelsRotated()
+			throws NanoleafException, IOException {
+		List<Panel> panels = new ArrayList<Panel>();
+		for (NanoleafDevice d : devices.values()) {
+			panels.addAll(d.getPanelsRotated());
+		}
+		return panels;
+	}
 	
 	/**
 	 * Sets the global orientation for the device.

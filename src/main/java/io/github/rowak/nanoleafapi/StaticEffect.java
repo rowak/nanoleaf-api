@@ -61,7 +61,6 @@ public class StaticEffect extends CustomEffect {
 		effect.setName(baseEffect.getName());
 		effect.setEffectType(STATIC_ANIM_TYPE);
 		effect.setVersion(baseEffect.getVersion());
-		effect.setColorType(baseEffect.getColorType());
 		effect.setPalette(baseEffect.getPalette());
 		if (json.has("animData")) {
 			effect.setAnimationData(json.getString("animData"));
