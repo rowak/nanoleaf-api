@@ -2,25 +2,13 @@ package io.github.rowak.nanoleafapi;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.here.oksse.OkSse;
-import com.here.oksse.ServerSentEvent;
 
 import io.github.rowak.nanoleafapi.event.NanoleafEventListener;
-import okhttp3.Request;
+import io.github.rowak.nanoleafapi.event.NanoleafTouchEventListener;
 
-import java.awt.Point;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -124,10 +112,17 @@ public class NanoleafGroup {
 	}
 	
 	/**
-	 * Closes all event listeners.
+	 * Closes all event listeners (not including touch event streaming listeners).
 	 */
 	public void closeEventListeners() {
 		devices.forEach((n, d) -> d.closeEventListeners());
+	}
+	
+	/**
+	 * Closes all low-latency touch event (streaming) listeners.
+	 */
+	public void closeTouchEventListeners() {
+		devices.forEach((n, d) -> d.closeTouchEventListeners());
 	}
 	
 	/**
@@ -618,6 +613,18 @@ public class NanoleafGroup {
 		setBrightness(color.getBrightness());
 	}
 	
+	/**
+	 * <p>Sets the color (HSB) of the device.</p>
+	 * 
+	 * <p>The callback status will return {@link NanoleafCallback#SUCCESS} on success,
+	 * or {@link NanoleafCallback#UNAUTHORIZED} if the access token is invalid. If an
+	 * internal API error occurs, it will instead return
+	 * {@link NanoleafCallback#FAILURE}. The returned data will never be meaningful
+	 * (either an empty string or null).</p>
+	 * 
+	 * @param color      the new color
+	 * @param callback   called when the color changes or when an error occurs
+	 */
 	public void setColorAsync(Color color, NanoleafCallback<String> callback) {
 		devices.forEach((n,d) -> {
 			setHueAsync(color.getHue(), (status, data, device) -> {
@@ -646,11 +653,22 @@ public class NanoleafGroup {
 		});
 	}
 	
+	/**
+	 * Gets a list of the names of the effects on all the devices.
+	 * 
+	 * @return                     a list of all effects
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
+	 */
 	public List<String> getAllEffectsList()
 			throws NanoleafException, IOException {
 		List<String> effects = new ArrayList<String>();
 		for (NanoleafDevice d : devices.values()) {
-			effects.addAll(d.getEffectsList());
+			for (String ef : d.getEffectsList()) {
+				if (!effects.contains(ef)) {
+					effects.add(ef);
+				}
+			}
 		}
 		return effects;
 	}
@@ -719,12 +737,22 @@ public class NanoleafGroup {
 		devices.forEach((n, d) -> d.setRandomEffectAsync(callback));
 	}
 	
-	
+	/**
+	 * Gets a list of the effects on all effects.
+	 * 
+	 * @return                     a list of all effects
+	 * @throws NanoleafException   If the access token is invalid
+	 * @throws IOException         If an HTTP exception occurs
+	 */
 	public List<Effect> getAllEffects()
 			throws NanoleafException, IOException {
 		List<Effect> effects = new ArrayList<Effect>();
 		for (NanoleafDevice d : devices.values()) {
-			effects.addAll(d.getAllEffects());
+			for (Effect ef : d.getAllEffects()) {
+				if (!effects.contains(ef)) {
+					effects.add(ef);
+				}
+			}
 		}
 		return effects;
 	}
@@ -1610,16 +1638,16 @@ public class NanoleafGroup {
 				transitionTime, callback));
 	}
 	
-//	public ServerSentEvent registerTouchEventListener(NanoleafEventListener listener,
-//			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
-//		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
-//		Request req = new Request.Builder()
-//				.url(url)
-//				.get()
-//				.build();
-//		OkSse okSse = new OkSse(client);
-//		ServerSentEvent s = okSse.newServerSentEvent(req, listener);
-//		sse.add(s);
-//		return s;
-//	}
+	public void registerEventListener(NanoleafEventListener listener,
+			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		for (NanoleafDevice d : devices.values()) {
+			d.registerEventListener(listener, stateEvents, layoutEvents, effectsEvents, touchEvents);
+		}
+	}
+	
+	public void registerTouchEventStreamingListener(NanoleafTouchEventListener listener) {
+		for (NanoleafDevice d : devices.values()) {
+			d.registerTouchEventStreamingListener(listener);
+		}
+	}
 }

@@ -30,7 +30,8 @@ public interface NanoleafEventListener extends ServerSentEvent.Listener {
 	
 	/**
 	 * Called when one or more events have been received.
-	 * @param events  an array of one or more events
+	 * 
+	 * @param events   an array of one or more events
 	 */
 	public void onEvent(Event[] events);
 	
