@@ -1,5 +1,5 @@
 # Nanoleaf Java Library
-This is an extensive synchronous and asynchronous Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are (will be) supported.
+This is an extensive synchronous and asynchronous Java library for the Nanoleaf RESTful API. The Aurora (Light Panels), Canvas, and Shapes devices are all supported, and all API features are supported.
 
 This library is the successor to my old Aurora Java library. It has a significant number of improvements, including:
 - Nanoleaf Shapes and Canvas devices are supported
@@ -61,7 +61,7 @@ List<NanoleafDeviceMeta> devices = NanoleafSetup.findNanoleafDevices(timeout);
 
 Next create an access token to authenticate with the chosen device. You must first physically hold down the power button on your device for 5-7 seconds until the LED starts flashing before running the following code. Make sure to write down your access token for future use, however you can create as many as you like.
 ```Java
-NanoleafMeta meta = ...
+NanoleafDeviceMeta meta = ...
 String accessToken = NanoleafSetup.createAccessToken(meta.getHostName(), meta.getPort());
 ```
 
