@@ -23,13 +23,6 @@ public class Effect {
 	private Palette palette;
 	
 	/**
-	 * The effect direction types available for some effects (such as Wheel).
-	 */
-	public enum Direction {
-		LEFT, RIGHT, UP, DOWN, OUTWARDS
-	}
-	
-	/**
 	 * Gets the name of the effect.
 	 * 
 	 * @return   the effect name

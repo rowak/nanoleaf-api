@@ -25,19 +25,37 @@ public class Palette {
 		}
 	}
 	
+	/**
+	 * A simple builder to make the construction of palette objects
+	 * look a little nicer.
+	 */
 	public static class Builder {
 		
 		private List<Color> colors;
 		
+		/**
+		 * Creates a new palette builder.
+		 */
 		public Builder() {
 			colors = new ArrayList<Color>();
 		}
 		
+		/**
+		 * Adds a color to the palette.
+		 * 
+		 * @param color   the color to add
+		 * @return        the current palette builder
+		 */
 		public Builder addColor(Color color) {
 			colors.add(color);
 			return this;
 		}
 		
+		/**
+		 * Builds the palette stored in the builder.
+		 * 
+		 * @return   a new palette
+		 */
 		public Palette build() {
 			return new Palette(colors);
 		}
