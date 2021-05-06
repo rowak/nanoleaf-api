@@ -3,7 +3,7 @@ package io.github.rowak.nanoleafapi.util;
 /**
  * This is a simple callback interface for the Hola Query wrapper.
  */
-public interface QueryCallback {
+interface QueryCallback {
 	
 	/**
 	 * Signals that an instance has been received. May be called more than once.

@@ -35,7 +35,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-public class Query {
+class Query {
     private final Service service;
     private final Domain domain;
     private final int browsingTimeout;

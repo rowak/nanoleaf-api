@@ -27,7 +27,7 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Instance {
+class Instance {
     private final String name;
     private final Set<InetAddress> addresses;
     private final int port;

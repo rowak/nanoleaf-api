@@ -1,9 +1,7 @@
-package io.github.rowak.nanoleafapi;
+package io.github.rowak.nanoleafapi.util;
 
 import java.net.InetAddress;
 import java.util.Iterator;
-
-import io.github.rowak.nanoleafapi.util.Instance;
 
 /**
  * An object for storing information related to a Nanoleaf device. This information

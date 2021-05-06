@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import io.github.rowak.nanoleafapi.NanoleafCallback;
 import io.github.rowak.nanoleafapi.NanoleafDevice;
-import io.github.rowak.nanoleafapi.NanoleafDeviceMeta;
 import io.github.rowak.nanoleafapi.NanoleafException;
 import io.github.rowak.nanoleafapi.NanoleafSearchCallback;
 import net.straylightlabs.hola.dns.Domain;

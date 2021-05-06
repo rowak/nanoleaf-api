@@ -1,5 +1,6 @@
 package io.github.rowak.nanoleafapi;
 
+import io.github.rowak.nanoleafapi.util.NanoleafDeviceMeta;
 import io.github.rowak.nanoleafapi.util.NanoleafSetup;
 
 /**
