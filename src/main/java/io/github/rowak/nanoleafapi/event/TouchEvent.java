@@ -37,6 +37,12 @@ public class TouchEvent extends Event {
 		super(attribute, value);
 	}
 
+	/**
+	 * Creates a touch event from JSON.
+	 * 
+	 * @param json   the touch event JSON
+	 * @return       a new touch event
+	 */
 	public static TouchEvent fromJSON(JSONObject json) {
 		int attribute = UNKNOWN_ATTRIBUTE;
 		Object value = null;
@@ -69,6 +75,11 @@ public class TouchEvent extends Event {
 		return getAttribute();
 	}
 	
+	/**
+	 * Gets the ID of the panel that was touched.
+	 * 
+	 * @return   the panel ID
+	 */
 	public int getPanelId() {
 		return (int)getValue();
 	}

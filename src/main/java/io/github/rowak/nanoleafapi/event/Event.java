@@ -2,6 +2,10 @@ package io.github.rowak.nanoleafapi.event;
 
 import org.json.JSONObject;
 
+/**
+ * Events are received from Nanoleaf devices when certain events occur.
+ * Events have a delay of about 1-2 seconds.
+ */
 public class Event {
 	
 	/** Event attribute that is unrecognizable by this library. You should never
@@ -19,7 +23,8 @@ public class Event {
 	
 	/**
 	 * Gets the event type.
-	 * @return
+	 * 
+	 * @return   the event type
 	 */
 	public EventType getType() {
 		return type;
@@ -28,6 +33,7 @@ public class Event {
 	/**
 	 * Gets the event attribute. This is the property that was updated
 	 * at the time the event occurred.
+	 * 
 	 * @return   the event attribute
 	 */
 	public int getAttribute() {

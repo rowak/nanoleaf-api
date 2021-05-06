@@ -8,6 +8,14 @@ import com.here.oksse.ServerSentEvent;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import io.github.rowak.nanoleafapi.NanoleafDevice;
+
+/**
+ * A listener for listening to events from a Nanoleaf device. A listener
+ * can be registered on a Nanoleaf device using the
+ * {@link NanoleafDevice#registerEventListener(NanoleafEventListener, boolean,
+ * boolean, boolean, boolean)} method.
+ */
 public interface NanoleafEventListener extends ServerSentEvent.Listener {
 	
 	/**

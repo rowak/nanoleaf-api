@@ -1,4 +1,4 @@
-package io.github.rowak.nanoleafapi.event;
+package io.github.rowak.nanoleafapi;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -7,7 +7,11 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UDPTouchEventListener implements Runnable {
+import io.github.rowak.nanoleafapi.event.DetailedTouchEvent;
+import io.github.rowak.nanoleafapi.event.NanoleafTouchEventListener;
+
+// Internal UDP listener for low-latency touch events
+class UDPTouchEventListener implements Runnable {
 	
 	/* This number is a bit arbitrary, but it should be able to allow for
 	 * about 1600 panels per packet */

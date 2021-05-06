@@ -1,8 +1,5 @@
 package io.github.rowak.nanoleafapi.event;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.json.JSONObject;
 
 /**
@@ -70,13 +67,6 @@ public class StateEvent extends Event {
 	public int getAttribute() {
 		return super.getAttribute();
 	}
-	
-//	
-//	public JSONObject toJSON() {
-//		JSONObject json = new JSONObject();
-//		json.put("attr", getAttribute());
-//		json.put("value", getValue());
-//	}
 	
 	@Override
 	public String toString() {

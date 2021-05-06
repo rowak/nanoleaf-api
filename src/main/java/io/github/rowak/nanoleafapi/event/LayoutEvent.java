@@ -12,7 +12,10 @@ import io.github.rowak.nanoleafapi.Panel;
  */
 public class LayoutEvent extends Event {
 
+	/** Triggered when the panel layout changes (panels are added/removed/moved). */
 	public static final int LAYOUT_ATTRIBUTE = 1;
+	
+	/** Triggered when the global orientation changes. */
 	public static final int GLOBAL_ORIENTATION_ATTRIBUTE = 2;
 	
 	protected LayoutEvent(int attribute, Object value) {
@@ -20,6 +23,12 @@ public class LayoutEvent extends Event {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Creates a layout event from JSON.
+	 * 
+	 * @param json   the event JSON
+	 * @return       a new layout event
+	 */
 	public static LayoutEvent fromJSON(JSONObject json) {
 		int attribute = UNKNOWN_ATTRIBUTE;
 		Object value = null;
@@ -58,11 +67,6 @@ public class LayoutEvent extends Event {
 		// This exists purely to override the javadoc
 		return super.getAttribute();
 	}
-	
-//	
-//	public JSONObject toJSON() {
-//		
-//	}
 	
 	@Override
 	public String toString() {

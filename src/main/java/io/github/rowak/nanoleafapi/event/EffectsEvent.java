@@ -11,13 +11,24 @@ import org.json.JSONObject;
  */
 public class EffectsEvent extends Event {
 	
+	/** Triggered when the selected effect changes (i.e., another effect
+	 *  is selected) */
 	public static final int SELECTED_EFFECT_ATTRIBUTE = 1;
+	
+	/** Triggered when the list of effects on a Nanoleaf device changes,
+	 *  such as when effects are added/deleted */
 	public static final int EFFECTS_LIST_ATTRIBUTE = 2;
 	
 	protected EffectsEvent(int attribute, Object value) {
 		super(attribute, value);
 	}
 
+	/**
+	 * Creates an effects event from JSON.
+	 * 
+	 * @param json   the event JSON
+	 * @return       a new effects event
+	 */
 	public static EffectsEvent fromJSON(JSONObject json) {
 		int attribute = UNKNOWN_ATTRIBUTE;
 		Object value = null;

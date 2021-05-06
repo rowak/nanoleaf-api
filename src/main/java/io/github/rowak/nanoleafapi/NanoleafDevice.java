@@ -9,7 +9,6 @@ import com.here.oksse.ServerSentEvent;
 import io.github.rowak.nanoleafapi.event.Event;
 import io.github.rowak.nanoleafapi.event.NanoleafEventListener;
 import io.github.rowak.nanoleafapi.event.NanoleafTouchEventListener;
-import io.github.rowak.nanoleafapi.event.UDPTouchEventListener;
 import io.github.rowak.nanoleafapi.schedule.Schedule;
 import io.github.rowak.nanoleafapi.util.HttpUtil;
 import okhttp3.Call;
