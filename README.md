@@ -8,8 +8,7 @@ This library is the successor to my old Aurora Java library. It has a significan
 - Effects class redesigned for Effect v2
 - Many broken features have been fixed
 
-## [Documentation](https://rawcdn.githack.com/rowak/nanoleaf-api/f25288cf7b862efc4238342eb5011c8c045eeca0/doc/index.html)
-
+## [Documentation](https://rawcdn.githack.com/rowak/nanoleaf-api/21241ecdfc84c54b7177469de00489a421c94b34/doc/index.html)
 
 ## Table of Contents
 1. **[Installation](#installation)**
@@ -126,7 +125,7 @@ device.decreaseColorTemperature(75);  // decreases the saturation by a percent a
 ```
 
 ### Effects
-The API includes various effect methods for adding, removing, renaming, previewing, and getting effects from the Nanoleaf device. Below are a few examples, but refer to the project documentation for many more.
+The API includes various effect methods for adding, removing, renaming, previewing, and getting effects from the Nanoleaf device. Below are a few examples, but refer to the [project documentation](#documentation) for many more.
 
 ```Java
 String currentEffect = device.getCurrentEffectName();
