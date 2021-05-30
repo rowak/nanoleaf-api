@@ -162,12 +162,13 @@ class Query {
         }
 
         questions.add(question);
-        if (isUsingIPv4) {
-            question.askOn(socket, mdnsGroupIPv4);
-        }
-        if (isUsingIPv6) {
-            question.askOn(socket, mdnsGroupIPv6);
-        }
+//        if (isUsingIPv4) {
+//            question.askOn(socket, mdnsGroupIPv4);
+//        }
+//        if (isUsingIPv6) {
+//            question.askOn(socket, mdnsGroupIPv6);
+//        }
+        question.askOn(socket, mdnsGroupIPv4);
     }
 
     private boolean isServerIsListening() {
