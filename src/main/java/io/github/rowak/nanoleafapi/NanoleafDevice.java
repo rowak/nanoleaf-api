@@ -2409,6 +2409,32 @@ public abstract class NanoleafDevice {
 	}
 	
 	/**
+	 * Gets the direct neighbors of a specific origin panel (i.e., the panels that
+	 * are directly connected to a specific panel).
+	 * 
+	 * @param panel    the origin panel
+	 * @param panels   all the panels of the Nanoleaf device
+	 * @return         a list of the direct neighbors
+	 */
+	public abstract List<Panel> getNeighborPanels(Panel panel, List<Panel> panels);
+	
+	/**
+	 * Gets the shape of the device panels. This does not include the
+	 * device controller panel or any modules that may be connected.
+	 * 
+	 * @return   the device panel shape
+	 */
+	public abstract ShapeType getShapeType();
+	
+	/**
+	 * Gets the shape of the device controller panel. This may or may not
+	 * be different from the rest of the panels.
+	 * 
+	 * @return   the device control panel shape
+	 */
+	public abstract ShapeType getControllerShapeType();
+	
+	/**
 	 * Gets the <code>SocketAddress</code> containing the hostname and port
 	 * of the external streaming controller.
 	 * 

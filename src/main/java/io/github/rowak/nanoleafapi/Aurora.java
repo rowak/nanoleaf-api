@@ -6,6 +6,9 @@ import java.net.SocketException;
 
 import org.json.JSONObject;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -74,6 +77,49 @@ public class Aurora extends NanoleafDevice {
 	protected Aurora(String hostname, int port, String accessToken, OkHttpClient client)
 			throws NanoleafException, IOException {
 		super(hostname, port, accessToken, client);
+	}
+	
+	public List<Panel> getNeighborPanels(Panel panel, List<Panel> panels) {
+		// The centroid distance is the (roughly) the distance between the
+		// centroids of two neighboring panels
+		final int CENTROID_DISTANCE = 90; // normally: 84
+		List<Panel> neighbors = new ArrayList<Panel>();
+		int p1x = panel.getX();
+		int p1y = panel.getY();
+		for (Panel p2 : panels) {
+			if (!panel.equals(p2)) {
+				int p2x = p2.getX();
+				int p2y = p2.getY();
+				if (Math.floor(Math.sqrt(Math.pow((p1x - p2x), 2) +
+						Math.pow((p1y - p2y), 2))) <= CENTROID_DISTANCE) {
+					neighbors.add(p2);
+				}
+			}
+		}
+		return neighbors;
+	}
+	
+	/**
+	 * Gets the shape of the Aurora panels. <b>This will always return
+	 * a shape type with type {@link ShapeType#TRIANGLE_AURORA}.</b>
+	 * 
+	 * @return   an aurora triangle shape type
+	 */
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.triangleAurora();
+	}
+	
+	/**
+	 * Gets the shape of the Aurora controller. <b>This will always return
+	 * <code>null</code>, since the Aurora controller doesn't have a
+	 * shape type mapping.</b>
+	 * 
+	 * @return   null
+	 */
+	@Override
+	public ShapeType getControllerShapeType() {
+		return null;
 	}
 	
 	/**

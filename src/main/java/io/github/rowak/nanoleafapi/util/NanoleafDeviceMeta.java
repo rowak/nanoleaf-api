@@ -54,7 +54,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Gets the name of the associated Nanoleaf device.
 	 * 
-	 * @return  the name of the device
+	 * @return   the name of the device
 	 */
 	public String getHostName() {
 		return hostName;
@@ -63,7 +63,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Sets the metadata host name of the associated Nanoleaf device.
 	 * 
-	 * @param hostName  the host name of the device
+	 * @param hostName   the host name of the device
 	 */
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
@@ -72,7 +72,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Gets the port of the associated Nanoleaf device.
 	 * 
-	 * @return  the port of the Nanoleaf device
+	 * @return   the port of the Nanoleaf device
 	 */
 	public int getPort() {
 		return port;
@@ -81,7 +81,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Sets the port of the associated Nanoleaf device.
 	 * 
-	 * @param port  the port of the Aurora
+	 * @param port   the port of the Aurora
 	 */
 	public void setPort(int port) {
 		this.port = port;
@@ -90,7 +90,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Gets the device id of the associated Nanoleaf device.
 	 * 
-	 * @return  the device id of the device
+	 * @return   the device id of the device
 	 */
 	public String getDeviceId() {
 		return deviceId;
@@ -99,7 +99,7 @@ public class NanoleafDeviceMeta {
 	/**
 	 * Sets the device id of the associated Nanoleaf device.
 	 * 
-	 * @param deviceId  the device id of the device
+	 * @param deviceId   the device id of the device
 	 */
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;

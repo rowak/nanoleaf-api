@@ -77,6 +77,13 @@ public class NanoleafGroup {
 	}
 	
 	/**
+	 * Removes all devices from the group.
+	 */
+	public void removeAllDevices() {
+		devices.clear();
+	}
+	
+	/**
 	 * Gets the set of devices in the group.
 	 * 
 	 * @return   the group devices
@@ -87,6 +94,15 @@ public class NanoleafGroup {
 			devicesCopy.put(s, devices.get(s));
 		}
 		return devices;
+	}
+	
+	/**
+	 * Gets the number of devices in the group.
+	 * 
+	 * @return   the number of devices
+	 */
+	public int getGroupSize() {
+		return devices.size();
 	}
 	
 	/**

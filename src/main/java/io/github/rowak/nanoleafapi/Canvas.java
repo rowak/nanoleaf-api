@@ -1,6 +1,8 @@
 package io.github.rowak.nanoleafapi;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 
@@ -71,6 +73,48 @@ public class Canvas extends NanoleafDevice {
 	protected Canvas(String hostname, int port, String accessToken, OkHttpClient client)
 			throws NanoleafException, IOException {
 		super(hostname, port, accessToken, client);
+	}
+	
+	public List<Panel> getNeighborPanels(Panel panel, List<Panel> panels) {
+		// The centroid distance is the (roughly) the distance between the
+		// centroids of two neighboring panels
+		final int CENTROID_DISTANCE = 105; // normally: 100
+		List<Panel> neighbors = new ArrayList<Panel>();
+		int p1x = panel.getX();
+		int p1y = panel.getY();
+		for (Panel p2 : panels) {
+			if (!panel.equals(p2)) {
+				int p2x = p2.getX();
+				int p2y = p2.getY();
+				if (Math.floor(Math.sqrt(Math.pow((p1x - p2x), 2) +
+						Math.pow((p1y - p2y), 2))) <= CENTROID_DISTANCE) {
+					neighbors.add(p2);
+				}
+			}
+		}
+		return neighbors;
+	}
+	
+	/**
+	 * Gets the shape of the Canvas panels. <b>This will always return
+	 * a shape type with type {@link ShapeType#SQUARE}.</b>
+	 * 
+	 * @return   a canvas panel shape type
+	 */
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.square();
+	}
+	
+	/**
+	 * Gets the shape of the Canvas controller. <b>This will always return
+	 * a shape type with type {@link ShapeType#CANVAS_MASTER}.</b>
+	 * 
+	 * @return   a canvas master panel shape type
+	 */
+	@Override
+	public ShapeType getControllerShapeType() {
+		return ShapeType.squareMaster();
 	}
 	
 	@Override

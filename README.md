@@ -34,8 +34,9 @@ This library is the successor to my old Aurora Java library. It has a significan
     1. **[Low-Latency Touch Events](#low-latency-touch-events)**
 6. **Schedules (WIP)**
 7. **[Asynchronous](#asynchronous)**
-8. **[Exceptions](#exceptions)**
-9. **[Used Libraries](#used-libraries)**
+8. **[Groups](#groups)**
+9. **[Exceptions](#exceptions)**
+10. **[Used Libraries](#used-libraries)**
 
 ## Installation
 ### Maven
@@ -144,6 +145,8 @@ int sideLength = device.getSideLength();
 List<Panel> panels = device.getPanels();
 List<Panel> panels = device.getPanelsRotated();
 ```
+
+Another useful method for processing panel data is the `device.getNeighborPanels(Panel, List<Panel>)` method, which returns the panels that are directly connected to a specific panel.
 
 ### Rhythm (Aurora only)
 Information about the rhythm module on the Aurora such as mode, connected/not connected, active/not active, and aux available can be accessed using getters. Below are a few examples.
@@ -293,6 +296,28 @@ device.getAllEffectsAsync((status, effects, device) -> {
 });
 ...
 device.closeAsync(); // close when you're done!
+```
+
+## Groups
+The `NanoleafGroup` class is a helper for controlling multiple Nanoleaf devices as one. It has almost the same interface as the `NanoleafDevice` class, but there are no getters for individual device properties. Both synchronous and asynchronous methods are available, however, the synchronous methods don't really make much sense to use in most cases, since the operation will be applied to all devices in the group one by one.
+
+The following example shows how to create and use a group:
+```Java
+Aurora aurora = new Aurora(...);
+Shapes hexagons = new Shapes(...);
+NanoleafGroup group = new NanoleafGroup();
+group.addDevice(aurora);
+group.addDevice(hexagons);
+group.setOnAsync(true, (status, data, device) -> {
+    if (status == NanoleafCallback.SUCCESS) {
+        if (device instanceof Aurora) {
+            // Aurora turned on
+        }
+        else if (device instanceof Shapes) {
+            // Shapes turned on
+        }
+    }
+});
 ```
 
 ## Exceptions

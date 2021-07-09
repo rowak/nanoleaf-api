@@ -14,7 +14,7 @@ import org.json.JSONObject;
  * a color and a set time that it takes to transition to that color. Each panel can only
  * have one frame.</p>
  * 
- * <p>The CustomEffect class provides methods for creating and interacting with
+ * <p>The StaticEffect class provides methods for creating and interacting with
  * static effects.</p>
  */
 public class StaticEffect extends CustomEffect {

@@ -258,8 +258,18 @@ public class Effect {
 			return false;
 		}
 		Effect other = (Effect)obj;
-		return this.name.equals(other.name) && this.efType.equals(other.efType) &&
-				this.version.equals(other.version) && this.colorType.equals(other.colorType) &&
+		return objEquals(this.name, other.name) && objEquals(this.efType, other.efType) &&
+				objEquals(this.version, other.version) && objEquals(this.colorType, other.colorType) &&
 				this.palette.equals(other.palette);
+	}
+	
+	private boolean objEquals(Object obj1, Object obj2) {
+		if (obj1 == obj2) {
+			return true;
+		}
+		else if (obj1 == null || obj2 == null) {
+			return false;
+		}
+		return obj1.equals(obj2);
 	}
 }

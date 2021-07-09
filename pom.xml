@@ -6,7 +6,7 @@
 
   <groupId>io.github.rowak</groupId>
   <artifactId>nanoleaf-api</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>A synchronous/asynchronous Java library for Nanoleaf Aurora, Canvas, and Shapes</description>
