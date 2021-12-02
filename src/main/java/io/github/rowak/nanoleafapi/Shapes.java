@@ -14,6 +14,8 @@ import okhttp3.OkHttpClient;
  */
 public class Shapes extends NanoleafDevice {
 
+	private String deviceName;
+	
 	/**
 	 * Creates a new instance of the Shapes controller.
 	 * 
@@ -27,6 +29,7 @@ public class Shapes extends NanoleafDevice {
 			throws NanoleafException, IOException {
 		
 		super(hostname, port, accessToken);
+		deviceName = getName();
 	}
 	
 	/**
@@ -40,6 +43,7 @@ public class Shapes extends NanoleafDevice {
 	public Shapes(String hostname, String accessToken)
 			throws NanoleafException, IOException {
 		super(hostname, DEFAULT_PORT, accessToken);
+		deviceName = getName();
 	}
 	
 	/**
@@ -56,6 +60,7 @@ public class Shapes extends NanoleafDevice {
 	public Shapes(String hostname, int port, String accessToken,
 			NanoleafCallback<Shapes> callback) {
 		super(hostname, port, accessToken, callback);
+		deviceName = getName();
 	}
 	
 	/**
@@ -76,6 +81,7 @@ public class Shapes extends NanoleafDevice {
 	protected Shapes(String hostname, int port, String accessToken, OkHttpClient client)
 			throws NanoleafException, IOException {
 		super(hostname, port, accessToken, client);
+		deviceName = getName();
 	}
 	
 	public List<Panel> getNeighborPanels(Panel panel, List<Panel> panels) {
@@ -108,7 +114,15 @@ public class Shapes extends NanoleafDevice {
 	 */
 	@Override
 	public ShapeType getShapeType() {
-		return ShapeType.triangleAurora();
+		if (deviceName.contains("DBC2")) {
+			return ShapeType.hexagon();
+		}
+		else if (deviceName.contains("C83F")) {
+			return ShapeType.triangleShapes();
+		}
+		else {
+			return ShapeType.miniTriangle();
+		}
 	}
 	
 	/**
