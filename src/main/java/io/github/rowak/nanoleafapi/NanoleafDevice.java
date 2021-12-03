@@ -2867,15 +2867,20 @@ public abstract class NanoleafDevice {
 	 * can instead use the {@link NanoleafDevice#registerTouchEventStreamingListener(NanoleafTouchEventListener)}
 	 * method for near-realtime latency.</p>
 	 * 
-	 * @param listener        a listener to listen for events
-	 * @param stateEvents     listens for changes to the state of the device
-	 * @param layoutEvents    listens for changes to the layout of the device panels
-	 * @param effectsEvents   listens for changes to the device effects or selected effect
-	 * @param touchEvents     listens for touch events such as "tap", "double-tap", and "swipe"
-	 * @return                an SSE object
+	 * @param listener                    a listener to listen for events
+	 * @param stateEvents                 listens for changes to the state of the device
+	 * @param layoutEvents                listens for changes to the layout of the device panels
+	 * @param effectsEvents               listens for changes to the device effects or selected effect
+	 * @param touchEvents                 listens for touch events such as "tap", "double-tap", and "swipe"
+	 * @return                            an SSE object
+	 * @throws IllegalArgumentException   if all event flags are set to false
 	 */
 	public ServerSentEvent registerEventListener(NanoleafEventListener listener,
 			boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
+		if (!stateEvents && !layoutEvents && !effectsEvents && !touchEvents) {
+			throw new IllegalArgumentException("At least one event flag (stateEvents, layoutEvents, " +
+					"effectsEvents, or touchEvents) must be set to true.");
+		}
 		String url = getURL("events" + getEventsQueryString(stateEvents, layoutEvents, effectsEvents, touchEvents));
 		Request req = new Request.Builder()
 				.url(url)
@@ -2932,26 +2937,15 @@ public abstract class NanoleafDevice {
 	
 	private String getEventsQueryString(boolean stateEvents, boolean layoutEvents, boolean effectsEvents, boolean touchEvents) {
 		StringBuilder query = new StringBuilder("?id=");
-		if (stateEvents) {
-			query.append("1");
-		}
-		if (layoutEvents) {
-			if (query.length() > 0) {
-				query.append(",");
+		boolean[] eventsEnabled = {stateEvents, layoutEvents, effectsEvents, touchEvents};
+		
+		for (int i = 0; i < 4; i++) {
+			if (eventsEnabled[i]) {
+				if (i > 0 && query.length() > 4) {
+					query.append(",");
+				}
+				query.append(i+1);
 			}
-			query.append("2");
-		}
-		if (effectsEvents) {
-			if (query.length() > 0) {
-				query.append(",");
-			}
-			query.append("3");
-		}
-		if (effectsEvents) {
-			if (query.length() > 0) {
-				query.append(",");
-			}
-			query.append("4");
 		}
 		return query.toString();
 	}
