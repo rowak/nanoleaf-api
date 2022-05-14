@@ -1,6 +1,8 @@
 package io.github.rowak.nanoleafapi.util;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 
 /**
@@ -37,17 +39,30 @@ public class NanoleafDeviceMeta {
 	 * 
 	 * <p><b>Note:</b> This is used internally by the API.</p>
 	 * 
-	 * @param instance   the packet data containing the Nanoleaf device information
-	 * @return           a new metadata object
+	 * @param instance              the packet data containing the Nanoleaf device information
+	 * @return                      a new metadata object
+	 * 
+	 * @throws IPMissingException   if no valid IPv4 addresses can be found
 	 */
-	public static NanoleafDeviceMeta fromMDNSInstance(Instance instance) {
+	public static NanoleafDeviceMeta fromMDNSInstance(Instance instance)
+			throws IPMissingException {
 		NanoleafDeviceMeta metadata = new NanoleafDeviceMeta(null, 0, null, null);
 		Iterator<InetAddress> addresses = instance.getAddresses().iterator();
-		InetAddress address = addresses.next();
+		InetAddress address = null;
+		do {
+			if (addresses.hasNext()) {
+				address = addresses.next();
+			}
+			else {
+				throw new IPMissingException();
+			}
+		} while (address instanceof Inet4Address == false);
+		
 		metadata.setHostName(address.getHostName());
 		metadata.setPort(instance.getPort());
 		metadata.setDeviceId(address.getHostAddress());
 		metadata.setDeviceName(instance.getName());
+		
 		return metadata;
 	}
 	
