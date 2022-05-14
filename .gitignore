@@ -1,5 +1,8 @@
 # Binary files
 target
+.idea/
+.classpath
+.project
 
 # Development
 deploy.sh
